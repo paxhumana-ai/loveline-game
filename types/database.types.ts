@@ -158,6 +158,45 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          marketing_data: Json | null
+          name: string | null
+          onboarding_completed_at: string | null
+          updated_at: string
+          user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          marketing_data?: Json | null
+          name?: string | null
+          onboarding_completed_at?: string | null
+          updated_at?: string
+          user_id: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          marketing_data?: Json | null
+          name?: string | null
+          onboarding_completed_at?: string | null
+          updated_at?: string
+          user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
       questions: {
         Row: {
           category: Database["public"]["Enums"]["question_category"]
@@ -318,6 +357,7 @@ export type Database = {
         | "preferences"
         | "hypothetical"
       round_status: "pending" | "active" | "completed"
+      user_type: "ADMIN" | "GENERAL"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -475,6 +515,7 @@ export const Constants = {
         "hypothetical",
       ],
       round_status: ["pending", "active", "completed"],
+      user_type: ["ADMIN", "GENERAL"],
     },
   },
 } as const
