@@ -1,5 +1,5 @@
-export { Header } from "./header";
-export { Navigation } from "./navigation";
-export { Footer } from "./footer";
-export { ErrorBoundary } from "./error-boundary";
-export { ClientWrapper } from "./client-wrapper";
+export * from "./client-wrapper";
+export * from "./error-boundary";
+export * from "./footer";
+export * from "./header";
+export * from "./navigation";

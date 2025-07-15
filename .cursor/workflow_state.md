@@ -4,7 +4,7 @@ _Last updated: 2025-01-21_
 
 ## Phase
 
-CONSTRUCT
+ANALYZE
 
 ## Status
 
@@ -12,62 +12,50 @@ RUNNING
 
 ## Items
 
-- [ ] **1. CSR 기반 단일 게임방 페이지 구현**
-
-  - [x] 1-1. `/app/room/[code]/page.tsx`를 CSR 구조로 전환 (Client Wrapper/Provider 적용)
-  - [x] 1-2. `GameStateProvider`, `GameStatusProvider`, `GameProgressManager` 등 Context/Provider로 상태 관리 통합
-  - [x] 1-3. 폴링 기반 상태 동기화(`useRoomPolling`, `useRoundPolling`) 적용
-  - [x] 1-4. 상태별 UI(대기실, 자유시간, 지목, 결과, 최종결과) 컴포넌트 조건부 렌더링
-  - [ ] 1-5. 기존 `/app/room/[code]/free-time/`, `/selection/`, `/results/`, `/round/` 등 서브 라우트 및 내부 page.tsx 삭제
-
-- [ ] **2. game-states 컴포넌트 정리 및 이동**
-
-  - [x] 2-1. `/components/game-states/` 내 주요 컴포넌트(`free-time.tsx`, `selection-time.tsx`, `round-results.tsx`, `final-results.tsx`)를 `/components/`로 이동
-  - [x] 2-2. 네이밍/props 구조를 공통 스타일에 맞게 리팩터링 (props 타입, 네이밍, export 등)
-  - [x] 2-3. 미사용/불필요 컴포넌트 및 dead code 삭제
-
-- [ ] **3. 코드 스타일 및 PRD 준수**
-  - [ ] 3-1. import 경로, 네이밍, props 타입 등 `/rules/ui.rules.mdc`, `/rules/form-ui.rules.mdc` 등 코드 스타일 가이드 준수 여부 점검
-  - [ ] 3-2. PRD(`template.prd.mdc`)의 단일 페이지, 상태 기반 UI 전환, 폴링 기반 실시간 동기화 등 요구사항 충족 여부 점검
+- [ ] 1. [participant] 도메인 dead code/미사용 파일 정리
+  - [ ] 1-1. actions/components/schemas 내 미사용 파일/컴포넌트 탐색
+  - [ ] 1-2. 불필요한 파일/코드 삭제 및 index.ts export 정리
+  - [ ] 1-3. git 커밋
+- [ ] 2. [participant] 도메인 엣지케이스/동시성 보완
+  - [ ] 2-1. 닉네임/캐릭터 중복 체크 atomic/unique 보장(트랜잭션/DB unique 제약 확인)
+  - [ ] 2-2. 재입장(temporarily_away→active) 라운드 상태별 처리(특히 selection_time 중 제한)
+  - [ ] 2-3. 상태 변경 UI/서버 동기화 누락 여부 점검 및 보완
+  - [ ] 2-4. git 커밋
+- [ ] 3. [participant] 도메인 코드 규칙/구조 준수 점검
+  - [ ] 3-1. 도메인별 index.ts, export/import 일관성 점검
+  - [ ] 3-2. 불필요한 import, dead code 제거
+  - [ ] 3-3. 코드 스타일 가이드(ui.rules.mdc, form-ui.rules.mdc 등) 준수 여부 점검
+  - [ ] 3-4. git 커밋
 
 ## Plan
 
-### 1. CSR 기반 단일 게임방 페이지 구현
+### 1. [participant] 도메인 dead code/미사용 파일 정리
 
-- `/app/room/[code]/page.tsx`:
-  - 기존 SSR 구조 → Client Wrapper(`"use client"`), GameStateProvider, GameStatusProvider, GameProgressManager로 감싸기
-  - 폴링 훅(`useRoomPolling`, `useRoundPolling`)으로 실시간 상태 동기화
-  - 상태별로 아래 컴포넌트 조건부 렌더링
-    - `WaitingRoom` (대기실)
-    - `FreeTime` (자유시간)
-    - `SelectionTime` (지목)
-    - `RoundResults` (라운드 결과)
-    - `FinalResults` (최종 결과)
-  - 기존 `/free-time/`, `/selection/`, `/results/`, `/round/` 등 하위 라우트 및 내부 page.tsx 삭제
+- actions/components/schemas 내 파일/컴포넌트 사용처 추적
+- 미사용/불필요 파일 삭제, index.ts export 정리
+- git 커밋
 
-### 2. game-states 컴포넌트 정리 및 이동
+### 2. [participant] 도메인 엣지케이스/동시성 보완
 
-- `/components/game-states/` 내 주요 컴포넌트:
-  - `free-time.tsx` → `/components/FreeTime.tsx`
-  - `selection-time.tsx` → `/components/SelectionTime.tsx`
-  - `round-results.tsx` → `/components/RoundResults.tsx`
-  - `final-results.tsx` → `/components/FinalResults.tsx`
-- props 타입, 네이밍, export 방식 등 공통 스타일로 리팩터링
-- 미사용/불필요 컴포넌트 및 dead code 삭제
+- 닉네임/캐릭터 중복 체크 로직 atomic/unique 보장(트랜잭션/DB unique 제약 확인)
+- 재입장(temporarily_away→active) 라운드 상태별 처리(특히 selection_time 중 제한)
+- 상태 변경 UI/서버 동기화 누락 여부 점검 및 보완
+- git 커밋
 
-### 3. 코드 스타일 및 PRD 준수
+### 3. [participant] 도메인 코드 규칙/구조 준수 점검
 
-- `/rules/ui.rules.mdc`, `/rules/form-ui.rules.mdc` 등 코드 스타일 가이드 준수
-- PRD(`template.prd.mdc`)의 단일 페이지, 상태 기반 UI 전환, 폴링 기반 실시간 동기화 등 요구사항 충족 여부 점검
-- 최종적으로 전체 구조/코드가 PRD와 규칙에 부합하는지 VALIDATE 단계에서 검증
+- 도메인별 index.ts, export/import 일관성 점검
+- 불필요한 import, dead code 제거
+- 코드 스타일 가이드(ui.rules.mdc, form-ui.rules.mdc 등) 준수 여부 점검
+- git 커밋
 
 ## Log
 
-- PHASE: BLUEPRINT 진입. 세부 작업 분해 및 pseudocode/파일 diff 설계 완료.
-- PHASE: CONSTRUCT 진입. 1-1 CSR 구조 전환부터 구현 시작.
-- 1-2~1-4, 2-1~2-3 완료. 상태 기반 단일 게임방 페이지 구현 및 game-states dead code 정리.
+(초기화)
 
 ## ArchiveLog
+
+(초기화)
 
 ## Rules
 
