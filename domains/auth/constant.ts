@@ -2,7 +2,7 @@
 export const appDefaultUrl = "";
 export const onBoardingUrl = "";
 export const registerUrl = "register";
-export const loginUrl = "login";
+export const loginUrl = "auth/login";
 export const authenticationCallbackUrl = "auth/callback";
 export const authenticationConfirmUrl = "auth/confirm";
 export const emailVerificationUrl = "email-verification";

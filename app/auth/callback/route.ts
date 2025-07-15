@@ -53,6 +53,6 @@ export async function GET(request: Request) {
 
   // return the user to an error page with instructions
   return NextResponse.redirect(
-    `${origin}${loginUrl}?message=${encodeURIComponent(loginErrorMessage)}`
+    getURL(`${loginUrl}?message=${encodeURIComponent(loginErrorMessage)}`)
   );
 }
