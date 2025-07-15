@@ -4,146 +4,218 @@ _Last updated: 2025-01-21_
 
 ## Phase
 
-VALIDATE
+CONSTRUCT
 
 ## Status
 
-COMPLETED
+RUNNING
 
 ## Items
 
-- [x] **1. Database Schema Extensions**
-  - [x] 1-1. Add time management fields to rounds table
-  - [x] 1-2. Add activity tracking fields to game_rooms table
-  - [x] 1-3. Add last_seen_at field to participants table
-  - [x] 1-4. Add round status enum and selection completion tracking
-- [x] **2. Server Actions Implementation**
-  - [x] 2-1. Implement game-room status server actions
-  - [x] 2-2. Implement participant management server actions
-  - [x] 2-3. Implement round management server actions
-- [x] **3. Polling Hooks Implementation**
-  - [x] 3-1. Create room polling hooks (useRoomPolling, useParticipantPolling)
-  - [x] 3-2. Create round polling hooks (useRoundPolling)
-  - [x] 3-3. Create timer hooks (useGameTimer)
-- [x] **4. State Management Components**
-  - [x] 4-1. Create game status provider context
-  - [x] 4-2. Create game progress manager component
-  - [ ] 4-3. Integrate polling system with existing game components
+- [ ] **1. Main Pages & Layout Implementation**
+
+  - [ ] 1-1. Create improved homepage with game introduction and main action buttons
+  - [ ] 1-2. Implement global layout with providers, theming, and metadata
+  - [ ] 1-3. Set up error boundaries and loading states
+
+- [ ] **2. Game Room Pages Implementation**
+
+  - [ ] 2-1. Enhance create room page with complete game settings
+  - [ ] 2-2. Enhance join room page with participant profile setup
+  - [ ] 2-3. Implement unified game room page with state-based rendering
+
+- [ ] **3. Game State Components Implementation**
+
+  - [ ] 3-1. Create waiting room component with real-time participant list
+  - [ ] 3-2. Create free time component with countdown and instructions
+  - [ ] 3-3. Create selection time component with question display and participant selection
+  - [ ] 3-4. Create round results component with matching announcements
+  - [ ] 3-5. Create final results component with game statistics
+
+- [ ] **4. Layout Components Implementation**
+
+  - [ ] 4-1. Create header component with branding and navigation
+  - [ ] 4-2. Create navigation component with breadcrumbs and game progress
+  - [ ] 4-3. Create footer component with info and links
+
+- [ ] **5. State Management & Context Implementation**
+
+  - [ ] 5-1. Implement game state provider with React Context
+  - [ ] 5-2. Create polling hooks for real-time state synchronization
+  - [ ] 5-3. Implement error handling and recovery mechanisms
+
+- [ ] **6. Routing & Navigation Implementation**
+
+  - [ ] 6-1. Implement protected routes and access control
+  - [ ] 6-2. Set up dynamic routing with proper validation
+  - [ ] 6-3. Implement state-based navigation without URL changes
+
+- [ ] **7. Responsive Design & Accessibility Implementation**
+
+  - [ ] 7-1. Implement mobile-first responsive design
+  - [ ] 7-2. Add accessibility features and keyboard navigation
+  - [ ] 7-3. Optimize touch interactions and gestures
+
+- [ ] **8. Performance & SEO Optimization**
+  - [ ] 8-1. Implement code splitting and lazy loading
+  - [ ] 8-2. Set up dynamic metadata and Open Graph tags
+  - [ ] 8-3. Optimize images and implement caching strategies
 
 ## Plan
 
-### Database Schema Extensions Strategy
+### Main Pages & Layout Strategy
 
-**1. Time Management Fields**
+**1. Global Layout Setup (`app/layout.tsx`)**
 
-- Add `freeTimeStartedAt`, `selectionTimeStartedAt` to rounds table
-- Add `lastActivityAt` to game_rooms table for tracking activity
-- Add `lastSeenAt` to participants table for online status
-- Update round status enum: `waiting`, `free_time`, `selection_time`, `completed`
+- Follow Next15 server component patterns with async props
+- Set up Shadcn theme provider with semantic classes
+- Configure global providers (GameStateProvider, ErrorBoundary)
+- Include Sonner toaster and metadata configuration
 
-### Server Actions Implementation Strategy
+**2. Homepage Enhancement (`app/page.tsx`)**
 
-**1. Game Room Status Actions (`domains/game-room/actions/`)**
+- Server component with improved landing page design
+- Clear call-to-action buttons for "방 만들기" / "방 참가하기"
+- Game rules explanation with engaging visuals
+- Responsive hero section with semantic theming
 
-- `status.action.ts`: getRoomStatus, updateLastActivity
-- `polling.action.ts`: getRoomWithParticipants, checkRoomChanges
+### Game Room Pages Strategy
 
-**2. Participant Management Actions (`domains/participant/actions/`)**
+**1. Room Creation Flow (`app/create-room/page.tsx`)**
 
-- `status.action.ts`: updateParticipantStatus, getParticipantStatuses
-- `polling.action.ts`: getActiveParticipants, updateLastSeen
+- Server component importing CreateRoomClient component
+- Enhanced form with game settings (participants, rounds)
+- Immediate host profile setup integration
+- Auto-redirect to waiting room after creation
 
-**3. Round Management Actions (`domains/round/actions/`)**
+**2. Room Join Flow (`app/join-room/page.tsx`)**
 
-- `status.action.ts`: getRoundStatus, updateRoundStatus
-- `timer.action.ts`: startFreeTime, startSelectionTime, endRound
-- `polling.action.ts`: getRoundWithTimer, checkRoundProgress
+- Server component importing JoinRoomClient component
+- Room code validation with real-time feedback
+- Complete participant profile setup flow
+- Capacity checking and error handling
 
-### Polling Hooks Implementation Strategy
+**3. Unified Game Room (`app/room/[code]/page.tsx`)**
 
-**1. Room Polling (`domains/game-room/hooks/`)**
+- Single page with conditional component rendering based on game state
+- Use existing game state enums (waiting, free_time, selection_time, etc.)
+- Polling-based real-time state synchronization
+- Seamless state transitions without page navigation
 
-- `useRoomPolling.ts`: 5초 간격 게임방 상태 폴링
-- `useParticipantPolling.ts`: 5초 간격 참가자 목록 폴링
+### Game State Components Strategy
 
-**2. Round Polling (`domains/round/hooks/`)**
+**1. Component Structure (`components/game-states/`)**
 
-- `useRoundPolling.ts`: 1초 간격 라운드 상태 폴링
-- `useGameTimer.ts`: 클라이언트 타이머 관리
-- `useRoundTimer.ts`: 라운드별 타이머 (자유시간 3분, 선택시간 1분)
-- `useServerTimeSync.ts`: 서버 시간 동기화
+- Separate components for each game state following ui.rules
+- Client components with "use client" directive
+- Business logic separation using custom hooks
+- Consistent props interface across state components
 
-**3. Optimization Hooks**
+**2. State Components Design**
 
-- `usePollingOptimization.ts`: 백그라운드 시 폴링 중단, 에러 재시도
-- `useConnectionStatus.ts`: 네트워크 상태 감지
+- `waiting-room.tsx`: Real-time participant list, host controls
+- `free-time.tsx`: Countdown timer, conversation encouragement
+- `selection-time.tsx`: Question display, participant grid, message input
+- `round-results.tsx`: Matching announcements with animations
+- `final-results.tsx`: Game statistics and popularity rankings
 
-### State Management Components Strategy
+### State Management Strategy
 
-**1. Context Providers (`domains/game-room/components/`)**
+**1. Game State Provider**
 
-- `game-status-provider.tsx`: 게임 상태 Context Provider
-- `polling-provider.tsx`: 폴링 상태 관리 Provider
+- React Context for global game state management
+- Polling hooks for real-time synchronization
+- Optimistic updates for better UX
+- Error recovery mechanisms
 
-**2. UI Components (`domains/round/components/`)**
+**2. Data Flow Pattern**
 
-- `polling-indicator.tsx`: 폴링 상태 표시
-- `timer-display.tsx`: 타이머 표시
-- `connection-status.tsx`: 연결 상태 표시
+- Server actions for state changes
+- Polling for state synchronization
+- Local state for UI interactions
+- Context for cross-component state sharing
 
-**3. Integration Components**
+### Layout & Navigation Strategy
 
-- Update existing game components to use polling hooks
-- Add real-time state synchronization
+**1. Layout Components (`components/layout/`)**
 
-### Security & Performance
+- Header with logo, page indicators, settings
+- Navigation with breadcrumbs and progress indicators
+- Footer with minimal branding and links
+- Consistent spacing and semantic theming
 
-- Use existing RLS policies for all server actions
-- Implement polling optimization (interval adjustment, background suspension)
-- Add error handling and retry logic
-- Minimize database queries with optimized selects
+**2. Routing Strategy**
+
+- Protected routes using middleware for room access
+- Dynamic route validation with proper error pages
+- State-based component switching without URL changes
+- Page refresh handling with state restoration
+
+### Responsive & Accessibility Strategy
+
+**1. Mobile-First Design**
+
+- All components designed for mobile screens first
+- Progressive enhancement for larger screens
+- Touch-friendly interface elements
+- Optimized layouts for different orientations
+
+**2. Accessibility Features**
+
+- Proper semantic HTML structure
+- Keyboard navigation support
+- Screen reader compatibility
+- Appropriate ARIA labels and roles
+- Color contrast compliance
+
+### Performance & SEO Strategy
+
+**1. Performance Optimizations**
+
+- Code splitting for game state components
+- Lazy loading for non-critical components
+- Image optimization for character assets
+- Efficient polling intervals and cleanup
+
+**2. SEO Implementation**
+
+- Dynamic metadata based on page context
+- Open Graph tags for social sharing
+- Structured data for game content
+- Proper robots.txt and sitemap
 
 ## Log
 
-**Phase: ANALYZE**:
+**ANALYZE Phase - Task 0007: Frontend Pages & Routing**
 
-- ✅ Read server-action.rules.mdc - Using createDrizzleSupabaseClient for RLS in server actions
-- ✅ Read db-schema.rules.mdc - Drizzle migration patterns and RLS policy considerations
-- ✅ Read ui.rules.mdc - Client/server component separation, React state management
-- ✅ Read 0006-realtime-communication-domain.md - Comprehensive polling system requirements
-- ✅ Analyzed current schema structure - Need time fields for rounds/rooms/participants
-- ✅ Designed server action structure - Game room, participant, round management actions
-- ✅ Designed polling strategy - Different intervals for different data types with hooks
-- ✅ Outlined component architecture - Context providers and UI components
+✅ Read ui.rules.mdc - Next15 server component patterns, client/server separation, shadcn UI usage, semantic theming
+✅ Read form-ui.rules.mdc - react-hook-form with zod validation patterns, Controller pattern
+✅ Read server-action.rules.mdc - server action patterns with Drizzle RLS client
 
-**Phase: CONSTRUCT**:
+**Task 0007 Requirements Summary:**
 
-- ✅ Item 1: Database Schema Extensions COMPLETED (already implemented)
-- ✅ Item 2-1: Game room status server actions (status.action.ts, polling.action.ts)
-- ✅ Item 2-2: Participant management server actions (status.action.ts, polling.action.ts)
-- ✅ Item 2-3: Round management server actions (status.action.ts, timer.action.ts, polling.action.ts)
-- ✅ Updated participant status enum to include "temporarily_away", "left"
-- ✅ ESLint validation passed, committed to git
+- **Main Page Structure**: 홈페이지, 전역 레이아웃 with providers and theming
+- **Game Room Pages**: 방 생성/참가 페이지, 통합 게임방 with state-based component rendering
+- **Game State Components**: 대기실, 자유시간, 지목시간, 라운드 결과, 최종 결과 컴포넌트
+- **Layout Components**: 헤더, 네비게이션, 푸터 with consistent branding
+- **Routing & Navigation**: 보호된 라우트, 동적 라우팅, 상태 기반 네비게이션
+- **Responsive Design**: 모바일 퍼스트, 접근성, 반응형 그리드
+- **State Management**: React Context for game state, polling hooks, error boundaries
+- **Performance**: 코드 스플리팅, 이미지 최적화, 캐싱 전략
+- **SEO**: 동적 메타데이터, Open Graph, 구조화된 데이터
 
-- ✅ Item 3-1: Created room polling hooks (useRoomPolling, useParticipantPolling)
-- ✅ Item 3-2: Created round polling hooks (useRoundPolling)
-- ✅ Item 3-3: Created timer hooks (useGameTimer)
+Moving to BLUEPRINT phase...
 
-- ✅ Item 4-1: Created game status provider context (GameStatusProvider)
-- ✅ Item 4-2: Created game progress manager component (GameProgressManager)
+**BLUEPRINT Phase Completed**
+✅ Decomposed task into 8 main items with detailed implementation strategy
+✅ Created comprehensive plan following ui.rules, form-ui.rules, and server-action.rules
+✅ Defined component structure, state management, routing, and optimization strategies
 
-**Phase: VALIDATE**:
-
-- ✅ Fixed missing checkRoomChanges function in polling.action.ts
-- ✅ ESLint validation passed - no errors or warnings
-- ✅ All server actions implement proper RLS patterns with createDrizzleSupabaseClient
-- ✅ All polling hooks use proper React patterns with useCallback, useEffect
-- ✅ Context providers follow React best practices
-- ✅ Git commits completed successfully
-
-VALIDATE phase completed successfully - Task 0006 implementation ready for integration!
+**CONSTRUCT Phase - Starting Item 1: Main Pages & Layout Implementation**
 
 ## ArchiveLog
+
+**Previous Task Completed**: Participant management system implementation - backend schemas, server actions, and frontend UI components completed successfully.
 
 ## Rules
 
