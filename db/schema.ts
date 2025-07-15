@@ -267,8 +267,9 @@ export const selections = pgTable(
       .references(() => participants.id, { onDelete: "cascade" })
       .notNull(),
     selectedParticipantId: uuid("selected_participant_id")
-      .references(() => participants.id, { onDelete: "cascade" })
-      .notNull(),
+      .references(() => participants.id, { onDelete: "cascade" }),
+    message: text("message"),
+    isPassed: boolean("is_passed").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (_table) => [

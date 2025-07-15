@@ -15,6 +15,13 @@
       "when": 1752553320369,
       "tag": "0001_nifty_clint_barton",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752557965456,
+      "tag": "0002_daily_captain_cross",
+      "breakpoints": true
     }
   ]
 }
