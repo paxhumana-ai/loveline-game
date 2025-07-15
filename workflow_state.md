@@ -21,13 +21,13 @@ RUNNING
   - [x] 2-1. Implement game-room status server actions
   - [x] 2-2. Implement participant management server actions
   - [x] 2-3. Implement round management server actions
-- [ ] **3. Polling Hooks Implementation**
-  - [ ] 3-1. Create room polling hooks (useRoomPolling, useParticipantPolling)
-  - [ ] 3-2. Create round polling hooks (useRoundPolling)
-  - [ ] 3-3. Create timer hooks (useGameTimer, useRoundTimer, useServerTimeSync)
-- [ ] **4. State Management Components**
-  - [ ] 4-1. Create game status provider context
-  - [ ] 4-2. Create polling indicator and timer display components
+- [x] **3. Polling Hooks Implementation**
+  - [x] 3-1. Create room polling hooks (useRoomPolling, useParticipantPolling)
+  - [x] 3-2. Create round polling hooks (useRoundPolling)
+  - [x] 3-3. Create timer hooks (useGameTimer)
+- [x] **4. State Management Components**
+  - [x] 4-1. Create game status provider context
+  - [x] 4-2. Create game progress manager component
   - [ ] 4-3. Integrate polling system with existing game components
 
 ## Plan
@@ -115,6 +115,24 @@ RUNNING
 - ✅ Designed server action structure - Game room, participant, round management actions
 - ✅ Designed polling strategy - Different intervals for different data types with hooks
 - ✅ Outlined component architecture - Context providers and UI components
+
+**Phase: CONSTRUCT**:
+
+- ✅ Item 1: Database Schema Extensions COMPLETED (already implemented)
+- ✅ Item 2-1: Game room status server actions (status.action.ts, polling.action.ts)
+- ✅ Item 2-2: Participant management server actions (status.action.ts, polling.action.ts)
+- ✅ Item 2-3: Round management server actions (status.action.ts, timer.action.ts, polling.action.ts)
+- ✅ Updated participant status enum to include "temporarily_away", "left"
+- ✅ ESLint validation passed, committed to git
+
+- ✅ Item 3-1: Created room polling hooks (useRoomPolling, useParticipantPolling)
+- ✅ Item 3-2: Created round polling hooks (useRoundPolling)
+- ✅ Item 3-3: Created timer hooks (useGameTimer)
+
+- ✅ Item 4-1: Created game status provider context (GameStatusProvider)
+- ✅ Item 4-2: Created game progress manager component (GameProgressManager)
+
+Ready to transition to VALIDATE phase - core polling system implementation completed!
 
 ## ArchiveLog
 

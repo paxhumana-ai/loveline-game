@@ -3,7 +3,7 @@
 import { createDrizzleSupabaseClient } from "@/db";
 import { gameRooms, participants } from "@/db/schema";
 import { roomSettingsSchema, type RoomSettingsInput } from "../schemas";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export async function updateGameRoomSettings(
   gameRoomId: string,
