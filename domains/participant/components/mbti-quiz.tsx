@@ -17,7 +17,6 @@ import {
   MBTI_CATEGORIES,
   MBTI_DESCRIPTIONS,
   mbtiSelectionSchema,
-  type MbtiSelectionInput,
 } from "../schemas";
 
 interface MbtiQuizProps {

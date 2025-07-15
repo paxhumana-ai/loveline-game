@@ -7,16 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CharacterSelector } from "./character-selector";
 import { MBTISelector } from "./mbti-selector";
-import { joinGameRoom } from "../actions";
+import { joinGameRoom } from "../actions/join.action";
 import { joinRoomSchema, type JoinRoomInput } from "../schemas";
 import { toast } from "sonner";
 
 export function JoinRoomForm() {
   const router = useRouter();
-  
+
   const {
     control,
     handleSubmit,
@@ -35,22 +41,13 @@ export function JoinRoomForm() {
 
   const onSubmit = async (data: JoinRoomInput) => {
     try {
-      const result = await joinGameRoom(null, data);
-      
+      const result = await joinGameRoom(data);
+
       if (result.success) {
         toast.success("게임방에 참가했습니다!");
-        router.push(`/room/${result.data.roomCode}`);
+        router.push(`/room/${result.data?.roomCode}`);
       } else {
-        if (typeof result.error === "object") {
-          Object.entries(result.error).forEach(([field, message]) => {
-            setError(field as keyof JoinRoomInput, {
-              type: "server",
-              message: Array.isArray(message) ? message[0] : message,
-            });
-          });
-        } else {
-          toast.error(result.error || "게임방 참가에 실패했습니다.");
-        }
+        toast.error(result.error || "게임방 참가에 실패했습니다.");
       }
     } catch (error) {
       console.error("게임방 참가 오류:", error);

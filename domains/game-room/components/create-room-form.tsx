@@ -7,16 +7,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CharacterSelector } from "./character-selector";
 import { MBTISelector } from "./mbti-selector";
-import { createGameRoom } from "../actions";
+import { createGameRoom } from "../actions/create.action";
 import { createRoomSchema, type CreateRoomInput } from "../schemas";
 import { toast } from "sonner";
 
 export function CreateRoomForm() {
   const router = useRouter();
-  
+
   const form = useForm<CreateRoomInput>({
     resolver: zodResolver(createRoomSchema),
     defaultValues: {
@@ -28,27 +34,23 @@ export function CreateRoomForm() {
       hostCharacter: "",
     },
   });
-  
-  const { control, handleSubmit, formState: { errors, isSubmitting }, setError } = form;
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = form;
 
   const onSubmit = async (data: CreateRoomInput) => {
     try {
-      const result = await createGameRoom(null, data);
-      
+      const result = await createGameRoom(data);
+
       if (result.success) {
         toast.success("게임방이 생성되었습니다!");
-        router.push(`/room/${result.data.roomCode}`);
+        router.push(`/room/${result.data?.roomCode}`);
       } else {
-        if (typeof result.error === "object") {
-          Object.entries(result.error).forEach(([field, message]) => {
-            setError(field as keyof CreateRoomInput, {
-              type: "server",
-              message: Array.isArray(message) ? message[0] : message,
-            });
-          });
-        } else {
-          toast.error(result.error || "게임방 생성에 실패했습니다.");
-        }
+        toast.error(result.error || "게임방 생성에 실패했습니다.");
       }
     } catch (error) {
       console.error("게임방 생성 오류:", error);
@@ -67,8 +69,8 @@ export function CreateRoomForm() {
                 name="maxParticipants"
                 control={control}
                 render={({ field }) => (
-                  <Select 
-                    value={field.value?.toString()} 
+                  <Select
+                    value={field.value?.toString()}
                     onValueChange={(value) => field.onChange(parseInt(value))}
                   >
                     <SelectTrigger id="maxParticipants">
@@ -90,15 +92,15 @@ export function CreateRoomForm() {
                 </p>
               )}
             </div>
-            
+
             <div>
               <Label htmlFor="totalRounds">총 라운드 수</Label>
               <Controller
                 name="totalRounds"
                 control={control}
                 render={({ field }) => (
-                  <Select 
-                    value={field.value?.toString()} 
+                  <Select
+                    value={field.value?.toString()}
                     onValueChange={(value) => field.onChange(parseInt(value))}
                   >
                     <SelectTrigger id="totalRounds">

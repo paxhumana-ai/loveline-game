@@ -25,7 +25,7 @@ import {
   participantProfileSchema,
   type ParticipantProfileInput,
 } from "../schemas";
-import { validateNickname } from "../actions";
+import { validateNickname } from "../actions/create.action";
 
 interface ParticipantProfileFormProps {
   gameRoomId: string;

@@ -19,12 +19,11 @@ import CharacterGallery from "./character-gallery";
 import MbtiQuiz from "./mbti-quiz";
 import ParticipantList from "./participant-list";
 import GenderBalanceIndicator from "./gender-balance-indicator";
+import { createParticipant, validateNickname } from "../actions/create.action";
 import {
-  createParticipant,
-  validateNickname,
   validateGameRoomAccess,
   validateParticipantCapacity,
-} from "../actions";
+} from "../actions/validation.action";
 import {
   type ParticipantProfileInput,
   type CharacterSelectionInput,

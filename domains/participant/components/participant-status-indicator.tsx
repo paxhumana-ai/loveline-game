@@ -12,9 +12,7 @@ import {
   CheckCircle,
   PlayCircle,
   StopCircle,
-  Clock,
   Users,
-  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 

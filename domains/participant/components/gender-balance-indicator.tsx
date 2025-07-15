@@ -16,9 +16,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Users, UserCheck, AlertTriangle, CheckCircle } from "lucide-react";
+import { Users, AlertTriangle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getParticipantsByRoomWithDetails } from "../actions";
+import { getParticipantsByRoomWithDetails } from "../actions/fetch.action";
 import { toast } from "sonner";
 
 interface GenderBalanceIndicatorProps {

@@ -12,12 +12,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  AVAILABLE_CHARACTERS,
-  characterSelectionSchema,
-  type CharacterSelectionInput,
-} from "../schemas";
-import { getAvailableCharacters } from "../actions";
+import { AVAILABLE_CHARACTERS, characterSelectionSchema } from "../schemas";
+import { getAvailableCharacters } from "../actions/fetch.action";
 
 interface CharacterGalleryProps {
   gameRoomId: string;

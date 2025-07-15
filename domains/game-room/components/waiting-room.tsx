@@ -9,12 +9,10 @@ import { Users, CheckCircle } from "lucide-react";
 import { GameRoomHeader } from "./game-room-header";
 import { ParticipantCard } from "./participant-card";
 import { RoomSettingsPanel } from "./room-settings-panel";
-import { 
-  updateParticipantStatus, 
-  leaveGameRoom, 
-  transferHost,
-  getGameRoomByCode 
-} from "../actions";
+import { getGameRoomByCode } from "../actions/fetch.action";
+import { updateParticipantStatus } from "../actions/update.action";
+import { leaveGameRoom } from "../actions/leave.action";
+import { transferHost } from "../actions/leave.action";
 import { toast } from "sonner";
 
 interface WaitingRoomProps {
@@ -37,24 +35,26 @@ interface WaitingRoomProps {
   roomCode: string;
 }
 
-export function WaitingRoom({ 
-  gameRoom: initialGameRoom, 
+export function WaitingRoom({
+  gameRoom: initialGameRoom,
   participants: initialParticipants,
-  roomCode 
+  roomCode,
 }: WaitingRoomProps) {
   const router = useRouter();
   const [gameRoom, setGameRoom] = useState(initialGameRoom);
   const [participants, setParticipants] = useState(initialParticipants);
   const [isReady, setIsReady] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  
+
   // 현재 사용자 정보 (실제로는 auth에서 가져와야 함)
   const currentUserId = "current-user-id"; // TODO: 실제 auth 연동
-  const currentParticipant = participants.find(p => p.id === currentUserId);
+  const currentParticipant = participants.find((p) => p.id === currentUserId);
   const isHost = gameRoom.hostId === currentUserId;
-  
-  const readyParticipants = participants.filter(p => p.status === "ready");
-  const canStartGame = participants.length >= 2 && readyParticipants.length === participants.length;
+
+  const readyParticipants = participants.filter((p) => p.status === "ready");
+  const canStartGame =
+    participants.length >= 2 &&
+    readyParticipants.length === participants.length;
 
   // 주기적으로 방 상태 업데이트
   useEffect(() => {
@@ -62,8 +62,8 @@ export function WaitingRoom({
       try {
         const result = await getGameRoomByCode(roomCode);
         if (result.success) {
-          setGameRoom(result.data.gameRoom);
-          setParticipants(result.data.participants);
+          setGameRoom(result.data?.gameRoom || initialGameRoom);
+          setParticipants(result.data?.participants || initialParticipants);
         }
       } catch (error) {
         console.error("방 상태 업데이트 오류:", error);
@@ -71,27 +71,28 @@ export function WaitingRoom({
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [roomCode]);
+  }, [roomCode, initialGameRoom, initialParticipants]);
 
   const handleToggleReady = async () => {
     if (!currentParticipant) return;
-    
+
     try {
       setIsUpdating(true);
       const newStatus = isReady ? "joined" : "ready";
-      
-      const result = await updateParticipantStatus(currentParticipant.id, newStatus);
-      
+
+      const result = await updateParticipantStatus(
+        currentParticipant.id,
+        newStatus
+      );
+
       if (result.success) {
         setIsReady(!isReady);
         toast.success(isReady ? "준비 취소" : "준비 완료!");
-        
+
         // 참가자 상태 업데이트
-        setParticipants(prev => 
-          prev.map(p => 
-            p.id === currentParticipant.id 
-              ? { ...p, status: newStatus }
-              : p
+        setParticipants((prev) =>
+          prev.map((p) =>
+            p.id === currentParticipant.id ? { ...p, status: newStatus } : p
           )
         );
       } else {
@@ -107,10 +108,14 @@ export function WaitingRoom({
 
   const handleLeaveRoom = async () => {
     if (!currentParticipant) return;
-    
+
     try {
-      const result = await leaveGameRoom(gameRoom.id, currentParticipant.id, false);
-      
+      const result = await leaveGameRoom(
+        gameRoom.id,
+        currentParticipant.id,
+        false
+      );
+
       if (result.success) {
         toast.success("게임방에서 나갔습니다.");
         router.push("/");
@@ -125,11 +130,16 @@ export function WaitingRoom({
 
   const handleTransferHost = async (participantId: string) => {
     try {
-      const result = await transferHost(gameRoom.id, null, { newHostParticipantId: participantId });
-      
+      const result = await transferHost(gameRoom.id, {
+        newHostParticipantId: participantId,
+      });
+
       if (result.success) {
         toast.success("호스트 권한이 이양되었습니다.");
-        setGameRoom(prev => ({ ...prev, hostId: result.data.newHost.userId }));
+        setGameRoom((prev) => ({
+          ...prev,
+          hostId: result.data?.newHost?.userId || null,
+        }));
       } else {
         toast.error(result.error || "호스트 권한 이양에 실패했습니다.");
       }
@@ -151,7 +161,7 @@ export function WaitingRoom({
 
   return (
     <div className="space-y-6">
-      <GameRoomHeader 
+      <GameRoomHeader
         gameRoom={gameRoom}
         participantCount={participants.length}
         onLeaveRoom={handleLeaveRoom}
@@ -167,7 +177,7 @@ export function WaitingRoom({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {participants.map(participant => (
+              {participants.map((participant) => (
                 <ParticipantCard
                   key={participant.id}
                   participant={participant}
@@ -190,13 +200,17 @@ export function WaitingRoom({
                       {isReady ? "준비완료" : "대기중"}
                     </Badge>
                   </div>
-                  
+
                   <Button
                     onClick={handleToggleReady}
                     disabled={isUpdating || gameRoom.status !== "waiting"}
                     variant={isReady ? "outline" : "default"}
                   >
-                    {isUpdating ? "변경 중..." : (isReady ? "준비 취소" : "준비 완료")}
+                    {isUpdating
+                      ? "변경 중..."
+                      : isReady
+                      ? "준비 취소"
+                      : "준비 완료"}
                   </Button>
                 </div>
               </CardContent>

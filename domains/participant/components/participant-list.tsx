@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Users } from "lucide-react";
 import { toast } from "sonner";
 import ParticipantAvatar from "./participant-avatar";
-import { getParticipantsByRoom } from "../actions";
+import { getParticipantsByRoom } from "../actions/fetch.action";
 
 interface ParticipantData {
   id: string;
@@ -43,31 +43,34 @@ export default function ParticipantList({
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const fetchParticipants = async (showLoadingState = true) => {
-    if (showLoadingState) {
-      setIsLoading(true);
-    } else {
-      setIsRefreshing(true);
-    }
-
-    try {
-      const result = await getParticipantsByRoom(gameRoomId);
-      if (result.success && result.data) {
-        setParticipants(result.data);
+  const fetchParticipants = useCallback(
+    async (showLoadingState = true) => {
+      if (showLoadingState) {
+        setIsLoading(true);
       } else {
-        toast.error(result.error || "참가자 목록을 불러오는데 실패했습니다.");
+        setIsRefreshing(true);
       }
-    } catch (error) {
-      toast.error("참가자 목록을 불러오는 중 오류가 발생했습니다.");
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
+
+      try {
+        const result = await getParticipantsByRoom(gameRoomId);
+        if (result.success && result.data) {
+          setParticipants(result.data);
+        } else {
+          toast.error(result.error || "참가자 목록을 불러오는데 실패했습니다.");
+        }
+      } catch (error) {
+        toast.error("참가자 목록을 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+      }
+    },
+    [gameRoomId]
+  );
 
   useEffect(() => {
     fetchParticipants();
-  }, [gameRoomId]);
+  }, [gameRoomId, fetchParticipants]);
 
   const handleRefresh = () => {
     fetchParticipants(false);
