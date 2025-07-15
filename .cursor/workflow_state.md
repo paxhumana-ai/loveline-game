@@ -12,12 +12,12 @@ RUNNING
 
 ## Items
 
-- [ ] **1. Backend Schema & Actions Implementation**
+- [x] **1. Backend Schema & Actions Implementation**
   - [x] 1-1. Define participant management schemas (profile, character, MBTI, status)
-  - [ ] 1-2. Implement create participant server actions
-  - [ ] 1-3. Implement update participant server actions
-  - [ ] 1-4. Implement fetch participant server actions
-  - [ ] 1-5. Implement validation server actions
+  - [x] 1-2. Implement create participant server actions
+  - [x] 1-3. Implement update participant server actions
+  - [x] 1-4. Implement fetch participant server actions
+  - [x] 1-5. Implement validation server actions
 - [ ] **2. Frontend UI Components Implementation**
   - [ ] 2-1. Create participant profile form component
   - [ ] 2-2. Create character gallery component
@@ -101,16 +101,16 @@ RUNNING
 
 **Phase: CONSTRUCT**:
 
-- ✅ Item 1-1: Created participant management schemas (profile, character, MBTI, status)
-  - Created domains/participant/schemas/ directory structure
-  - participant-profile.schema.ts: nickname 2-8 chars, gender validation
-  - character-selection.schema.ts: 20 animal character validation
-  - mbti-selection.schema.ts: 16 MBTI types with categories and descriptions
-  - participant-status.schema.ts: status changes (joined/ready/playing/finished)
-  - All schemas use zod validation with proper TypeScript types
-  - ESLint validation passed successfully
+- ✅ Item 1: Backend Schema & Actions Implementation COMPLETED
+  - ✅ Item 1-1: Created participant management schemas (profile, character, MBTI, status)
+  - ✅ Item 1-2: Implemented create participant server actions (createParticipant, validateNickname)
+  - ✅ Item 1-3: Implemented update participant server actions (updateParticipantProfile, updateParticipantStatus, updateCharacter)
+  - ✅ Item 1-4: Implemented fetch participant server actions (getParticipantsByRoom, getParticipantProfile, getAvailableCharacters)
+  - ✅ Item 1-5: Implemented validation server actions (checkCharacterAvailability, validateParticipantCapacity, validateGameRoomAccess)
+  - All server actions follow RLS patterns and use createDrizzleSupabaseClient
+  - ESLint validation passed, committed to git
 
-Starting Item 1-2: Create participant server actions
+Starting Item 2-1: Create participant profile form component
 
 ## ArchiveLog
 
