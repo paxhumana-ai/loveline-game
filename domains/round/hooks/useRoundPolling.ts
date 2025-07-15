@@ -6,6 +6,7 @@ import {
   checkRoundProgress,
 } from "../actions/polling.action";
 import { getRoundTimer } from "../actions/timer.action";
+import { toast } from "sonner";
 
 interface RoundData {
   id: string;
@@ -102,13 +103,21 @@ export function useRoundPolling({
       } else {
         const errorMessage = result.error || "Failed to fetch round data";
         setError(errorMessage);
-        onError?.(errorMessage);
+        if (onError) {
+          onError(errorMessage);
+        } else {
+          toast.error(errorMessage);
+        }
       }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
-      onError?.(errorMessage);
+      if (onError) {
+        onError(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
       isPollingRef.current = false;

@@ -3,12 +3,42 @@
 import { createDrizzleSupabaseClient } from "@/db";
 import { participants } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { getParticipantProfile } from "./fetch.action";
+import { getRoundStatus } from "@/domains/round/actions/fetch.action";
 
 export async function updateParticipantStatus(
   participantId: string,
   status: "joined" | "temporarily_away" | "left"
 ) {
   try {
+    // 재입장 시 selection_time 제한 로직
+    if (status === "joined") {
+      // 참가자 정보 조회
+      const profileRes = await getParticipantProfile(participantId);
+      if (!profileRes.success || !profileRes.data) {
+        return {
+          success: false,
+          error: "참가자 정보를 찾을 수 없습니다.",
+          data: null,
+        };
+      }
+      const gameRoomId = profileRes.data.gameRoomId;
+      // 현재 라운드 상태 조회
+      const roundStatusRes = await getRoundStatus(gameRoomId);
+      if (
+        roundStatusRes.success &&
+        roundStatusRes.data &&
+        roundStatusRes.data.currentRound &&
+        roundStatusRes.data.currentRound.status === "selection_time"
+      ) {
+        return {
+          success: false,
+          error:
+            "지목 시간 중에는 재입장이 불가합니다. 다음 라운드부터 참여할 수 있습니다.",
+          data: null,
+        };
+      }
+    }
     const db = await createDrizzleSupabaseClient();
 
     const updatedParticipant = await db.rls((tx) =>

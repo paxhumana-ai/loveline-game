@@ -1,0 +1,2 @@
+ALTER TABLE "participants" ADD CONSTRAINT "unique_nickname_per_room" UNIQUE("game_room_id","nickname");--> statement-breakpoint
+ALTER TABLE "participants" ADD CONSTRAINT "unique_character_per_room" UNIQUE("game_room_id","character");

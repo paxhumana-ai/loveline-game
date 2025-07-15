@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { getRoomStatus } from "../actions/status.action";
 import { checkRoomChanges } from "../actions/polling.action";
+import { toast } from "sonner";
 
 interface RoomData {
   id: string;
@@ -62,13 +63,21 @@ export function useRoomPolling({
       } else {
         const errorMessage = result.error || "Failed to fetch room data";
         setError(errorMessage);
-        onError?.(errorMessage);
+        if (onError) {
+          onError(errorMessage);
+        } else {
+          toast.error(errorMessage);
+        }
       }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
-      onError?.(errorMessage);
+      if (onError) {
+        onError(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
       isPollingRef.current = false;

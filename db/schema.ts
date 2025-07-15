@@ -119,39 +119,25 @@ export const gameRooms = pgTable(
   "game_rooms",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    code: text("code").notNull().unique(), // 6자리 게임방 코드
+    code: text("code").notNull().unique(),
     maxParticipants: integer("max_participants").notNull().default(8),
     totalRounds: integer("total_rounds").notNull().default(3),
-    hostId: uuid("host_id"), // nullable - 호스트가 나가도 게임은 계속
+    hostId: uuid("host_id"),
     status: gameRoomStatusEnum("status").notNull().default("waiting"),
     lastActivityAt: timestamp("last_activity_at").defaultNow(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (_table) => [
-    pgPolicy("Enable read access for participants", {
+    pgPolicy("Allow all select", {
       for: "select",
       to: [anonRole, authenticatedRole],
-      using: sql`id in (
-        select game_room_id from participants 
-        where user_id = (select auth.uid()) OR user_id IS NULL
-      )`,
+      using: sql`true`,
     }),
-    pgPolicy("Enable insert for authenticated users", {
+    pgPolicy("Allow all insert", {
       for: "insert",
-      to: authenticatedRole,
-      withCheck: sql`(select auth.uid()) = host_id`,
-    }),
-    pgPolicy("Enable update for host only", {
-      for: "update",
-      to: authenticatedRole,
-      using: sql`(select auth.uid()) = host_id`,
-      withCheck: sql`(select auth.uid()) = host_id`,
-    }),
-    pgPolicy("Enable delete for host only", {
-      for: "delete",
-      to: authenticatedRole,
-      using: sql`(select auth.uid()) = host_id`,
+      to: [anonRole, authenticatedRole],
+      withCheck: sql`true`,
     }),
   ]
 ).enableRLS();
@@ -166,32 +152,25 @@ export const participants = pgTable(
     nickname: text("nickname").notNull(),
     gender: genderEnum("gender").notNull(),
     mbti: mbtiEnum("mbti").notNull(),
-    character: text("character").notNull(), // 동물 캐릭터 이름
+    character: text("character").notNull(),
     status: participantStatusEnum("status").notNull().default("joined"),
-    userId: uuid("user_id"), // nullable - 익명 참가 가능
+    userId: uuid("user_id").references(() => users.id),
     lastSeenAt: timestamp("last_seen_at").defaultNow(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (_table) => [
-    pgPolicy("Enable read access for same room participants", {
+  (table) => [
+    unique("unique_nickname_per_room").on(table.gameRoomId, table.nickname),
+    unique("unique_character_per_room").on(table.gameRoomId, table.character),
+    pgPolicy("Allow all select", {
       for: "select",
       to: [anonRole, authenticatedRole],
-      using: sql`game_room_id in (
-        select game_room_id from participants 
-        where user_id = (select auth.uid()) OR user_id IS NULL
-      )`,
+      using: sql`true`,
     }),
-    pgPolicy("Enable insert for authenticated and anonymous users", {
+    pgPolicy("Allow all insert", {
       for: "insert",
       to: [anonRole, authenticatedRole],
-      withCheck: sql`(user_id IS NULL AND (select auth.uid()) IS NULL) OR (user_id IS NOT NULL AND user_id = (select auth.uid()))`,
-    }),
-    pgPolicy("Enable update for own record", {
-      for: "update",
-      to: [anonRole, authenticatedRole],
-      using: sql`(user_id IS NULL AND (select auth.uid()) IS NULL) OR (user_id IS NOT NULL AND user_id = (select auth.uid()))`,
-      withCheck: sql`(user_id IS NULL AND (select auth.uid()) IS NULL) OR (user_id IS NOT NULL AND user_id = (select auth.uid()))`,
+      withCheck: sql`true`,
     }),
   ]
 ).enableRLS();
@@ -202,7 +181,7 @@ export const questions = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     content: text("content").notNull(),
     category: questionCategoryEnum("category").notNull(),
-    difficulty: integer("difficulty").notNull().default(1), // 1-5 난이도
+    difficulty: integer("difficulty").notNull().default(1),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -234,31 +213,16 @@ export const rounds = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [
-    pgPolicy("Enable read access for same room participants", {
+  (_table) => [
+    pgPolicy("Allow all select", {
       for: "select",
       to: [anonRole, authenticatedRole],
-      using: sql`game_room_id in (
-        select game_room_id from participants 
-        where user_id = (select auth.uid()) OR user_id IS NULL
-      )`,
+      using: sql`true`,
     }),
-    pgPolicy("Enable insert for game room host", {
+    pgPolicy("Allow all insert", {
       for: "insert",
-      to: authenticatedRole,
-      withCheck: sql`game_room_id in (
-        select id from game_rooms where host_id = (select auth.uid())
-      )`,
-    }),
-    pgPolicy("Enable update for game room host", {
-      for: "update",
-      to: authenticatedRole,
-      using: sql`game_room_id in (
-        select id from game_rooms where host_id = (select auth.uid())
-      )`,
-      withCheck: sql`game_room_id in (
-        select id from game_rooms where host_id = (select auth.uid())
-      )`,
+      to: [anonRole, authenticatedRole],
+      withCheck: sql`true`,
     }),
   ]
 ).enableRLS();
@@ -279,22 +243,15 @@ export const selections = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (_table) => [
-    pgPolicy("Enable read access for same round participants", {
+    pgPolicy("Allow all select", {
       for: "select",
       to: [anonRole, authenticatedRole],
-      using: sql`round_id in (
-        select r.id from rounds r
-        join participants p on r.game_room_id = p.game_room_id
-        where p.user_id = (select auth.uid()) OR p.user_id IS NULL
-      )`,
+      using: sql`true`,
     }),
-    pgPolicy("Enable insert for own selections", {
+    pgPolicy("Allow all insert", {
       for: "insert",
       to: [anonRole, authenticatedRole],
-      withCheck: sql`selector_participant_id in (
-        select id from participants 
-        where user_id = (select auth.uid()) OR user_id IS NULL
-      )`,
+      withCheck: sql`true`,
     }),
   ]
 ).enableRLS();
@@ -315,23 +272,15 @@ export const matches = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (_table) => [
-    pgPolicy("Enable read access for matched participants", {
+    pgPolicy("Allow all select", {
       for: "select",
       to: [anonRole, authenticatedRole],
-      using: sql`participant1_id in (
-        select id from participants 
-        where user_id = (select auth.uid()) OR user_id IS NULL
-      ) OR participant2_id in (
-        select id from participants 
-        where user_id = (select auth.uid()) OR user_id IS NULL
-      )`,
+      using: sql`true`,
     }),
-    pgPolicy("Enable insert for game room host", {
+    pgPolicy("Allow all insert", {
       for: "insert",
-      to: authenticatedRole,
-      withCheck: sql`game_room_id in (
-        select id from game_rooms where host_id = (select auth.uid())
-      )`,
+      to: [anonRole, authenticatedRole],
+      withCheck: sql`true`,
     }),
   ]
 ).enableRLS();

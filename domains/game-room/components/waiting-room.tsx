@@ -14,6 +14,7 @@ import { updateParticipantStatus } from "../actions/update.action";
 import { leaveGameRoom } from "../actions/leave.action";
 import { transferHost } from "../actions/leave.action";
 import { toast } from "sonner";
+import { createClient } from "@/utils/supabase/browser";
 
 interface WaitingRoomProps {
   gameRoom: {
@@ -52,8 +53,19 @@ export function WaitingRoom({
   const [isReady, setIsReady] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // 현재 사용자 정보 (실제로는 auth에서 가져와야 함)
-  const currentUserId = "current-user-id"; // TODO: 실제 auth 연동
+  // Supabase 인증 유저 정보 가져오기
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id ?? null);
+    };
+    fetchUser();
+  }, []);
+
   const currentParticipant = participants.find((p) => p.id === currentUserId);
   const isHost = gameRoom.hostId === currentUserId;
 
@@ -102,7 +114,15 @@ export function WaitingRoom({
           )
         );
       } else {
-        toast.error(result.error || "상태 변경에 실패했습니다.");
+        // selection_time 중 재입장 제한 에러 메시지 안내
+        if (
+          result.error &&
+          result.error.includes("지목 시간 중에는 재입장이 불가합니다")
+        ) {
+          toast.error(result.error);
+        } else {
+          toast.error(result.error || "상태 변경에 실패했습니다.");
+        }
       }
     } catch (error) {
       console.error("준비 상태 변경 오류:", error);

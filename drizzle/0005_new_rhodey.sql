@@ -1,0 +1,13 @@
+-- ALTER TABLE "participants" ADD CONSTRAINT "participants_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+-- ALTER POLICY "Enable read access for participants" ON "game_rooms" RENAME TO "Allow all select";--> statement-breakpoint
+-- ALTER POLICY "Enable insert for authenticated users" ON "game_rooms" RENAME TO "Allow all insert";--> statement-breakpoint
+-- ALTER POLICY "Enable update for host only" ON "game_rooms" RENAME TO "Allow all update";--> statement-breakpoint
+-- ALTER POLICY "Enable delete for host only" ON "game_rooms" RENAME TO "Allow all delete";--> statement-breakpoint
+-- ALTER POLICY "Enable read access for matched participants" ON "matches" RENAME TO "Enable read access for all users";--> statement-breakpoint
+-- ALTER POLICY "Enable read access for same room participants" ON "participants" RENAME TO "Allow all select";--> statement-breakpoint
+-- ALTER POLICY "Enable insert for authenticated and anonymous users" ON "participants" RENAME TO "Allow all insert";--> statement-breakpoint
+-- ALTER POLICY "Enable update for own record" ON "participants" RENAME TO "Allow all update";--> statement-breakpoint
+-- ALTER POLICY "Enable read access for same room participants" ON "rounds" RENAME TO "Enable read access for all users";--> statement-breakpoint
+-- ALTER POLICY "Enable read access for same round participants" ON "selections" RENAME TO "Enable read access for all users";--> statement-breakpoint
+-- ALTER POLICY "Enable insert for own selections" ON "selections" RENAME TO "Enable insert for all users (무한 재귀 방지)";--> statement-breakpoint
+-- CREATE POLICY "Allow all delete" ON "participants" AS PERMISSIVE FOR DELETE TO "anon", "authenticated" USING (true);

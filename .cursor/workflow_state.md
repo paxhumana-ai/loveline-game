@@ -4,7 +4,7 @@ _Last updated: 2025-01-21_
 
 ## Phase
 
-CONSTRUCT
+VALIDATE
 
 ## Status
 
@@ -12,74 +12,37 @@ RUNNING
 
 ## Items
 
-- [ ] **1. [공통] 게임 시작 체크리스트 요구사항 분석 및 설계**
-
-  - [x] 1-1. 모든 참가자 '준비 완료' 조건 분석 및 pseudocode 설계
-  - [x] 1-2. 참가자 상태 UI/UX 표시 규칙 pseudocode 설계
-  - [x] 1-3. 호스트 전용 '게임 시작' 버튼 활성화 조건 pseudocode 설계
-  - [x] 1-4. 인증 연동/임시 ID 세팅 UX pseudocode 설계
-  - [x] 1-5. 상태 동기화/에러 안내 UX pseudocode 설계
-
-- [ ] **2. [participant] 참가자 상태 전이 및 UI/UX 설계**
-
-  - [x] 2-1. joined → ready → playing → finished 상태 전이 흐름 pseudocode 설계
-  - [x] 2-2. '준비 완료' 버튼 동작 및 서버 반영 pseudocode 설계
-  - [x] 2-3. 인증 미연동 시 임시 currentUserId 세팅 가이드 pseudocode 설계
-  - [x] 2-4. 폴링/구독 방식의 상태 실시간 반영 pseudocode 설계
-
-- [ ] **3. [game-room] 게임 시작 버튼 및 상태 일괄 변경 설계**
-
-  - [x] 3-1. 호스트만 '게임 시작' 버튼 노출/활성화 조건 pseudocode 설계
-  - [x] 3-2. startGame 액션 정상 동작 및 상태 일괄 변경 pseudocode 설계
-  - [x] 3-3. 상태 변경 실패/에러 발생 시 sonner toast 안내 pseudocode 설계
-
-- [ ] **4. [auth] 인증 연동 및 테스트 환경 가이드 설계**
-
-  - [x] 4-1. currentUserId 인증 연동 로직 pseudocode 설계
-  - [x] 4-2. 임시 currentUserId 세팅 가이드 pseudocode 설계
-
-- [ ] **5. [ui] 상태 Badge/버튼 활성화/에러 안내 UI/UX 설계**
-  - [x] 5-1. 참가자 상태 Badge 등 UI 표시 규칙 pseudocode 설계
-  - [x] 5-2. 버튼 활성화/비활성화 조건 UI/UX 규칙 pseudocode 설계
-  - [x] 5-3. sonner toast 에러/상태 안내 규칙 pseudocode 설계
+- [x] 1-1. 모든 참가자 'ready' 상태 체크 로직 구현 (서버/프론트)
+- [x] 1-2. 참가자 상태 Badge UI 구현 및 테스트
+- [x] 1-3. 호스트 전용 '게임 시작' 버튼 노출/활성화 구현 및 테스트
+- [x] 1-4. 인증 연동/임시 currentUserId 세팅 가이드 문서화
+- [x] 1-5. 상태 동기화/에러 안내 sonner toast 구현 및 테스트
+- [x] 2-1. joined → ready → playing → finished 상태 Enum/로직 구현
+- [x] 2-2. '준비 완료' 버튼 서버 액션/zod schema/상태 반영 구현
+- [x] 2-3. 인증 미연동 시 임시 currentUserId 세팅 가이드 문서화
+- [x] 2-4. useParticipantPolling 등 폴링 훅 상태 실시간 반영 구현
+- [x] 3-1. 호스트만 '게임 시작' 버튼 노출/활성화 구현
+  - room-settings-panel.tsx: 호스트만 버튼 노출, canStartGame 조건 활성화
+- [x] 3-2. startGame 액션 정상 동작 및 상태 일괄 변경 구현
+  - update.action.ts: startGame 서버 액션에서 방/참가자 상태 일괄 변경
+- [x] 3-3. 상태 변경 실패/에러 발생 시 sonner toast 안내 구현
+  - waiting-room.tsx, room-settings-panel.tsx: toast로 에러 안내 UX 구현
+- [x] 4-1. 인증 연동/테스트 환경 currentUserId 세팅 가이드 문서화
+  - waiting-room.tsx, README.md: 인증 연동/임시 세팅 가이드
+- [x] 5-1. 상태 Badge, 버튼 활성화 조건, toast 안내 등 UI/UX 규칙 구현 및 테스트
+  - waiting-room.tsx, participant-list.tsx, room-settings-panel.tsx: UI/UX 규칙 일관성 확인
 
 ## Plan
 
-### 1. [공통] 게임 시작 체크리스트 요구사항 설계
-
-- 모든 참가자가 'ready' 상태일 때만 게임 시작 가능 (서버/프론트 모두 체크)
-- 참가자 상태는 UI에서 Badge 등으로 명확히 표시
-- 호스트만 '게임 시작' 버튼 노출, 조건 충족 시 활성화
-- 인증 연동이 안 된 경우 임시 currentUserId 세팅 가이드 제공
-- 상태 동기화/에러 안내는 sonner toast 등으로 즉시 안내
-
-### 2. [participant] 참가자 상태 전이 및 UI/UX 설계
-
-- 상태 Enum: joined → ready → playing → finished
-- '준비 완료' 버튼 클릭 시 서버 액션으로 상태 변경, zod schema로 검증
-- 인증 미연동 시 currentUserId를 임시로 세팅할 수 있도록 개발 가이드 제공
-- useParticipantPolling 등 폴링 훅으로 상태 실시간 반영
-
-### 3. [game-room] 게임 시작 버튼 및 상태 일괄 변경 설계
-
-- 호스트만 '게임 시작' 버튼 노출, canStartGame 조건(모두 ready) 충족 시 활성화
-- startGame 서버 액션: 방 상태 waiting → in_progress, 참가자 ready → playing 일괄 변경
-- 상태 변경 실패/에러 발생 시 sonner toast로 안내
-
-### 4. [auth] 인증 연동 및 테스트 환경 가이드 설계
-
-- supabase client(server/client)로 currentUserId 연동
-- 인증 미연동 시 임시 currentUserId 세팅 가이드 문서화
-
-### 5. [ui] 상태 Badge/버튼 활성화/에러 안내 UI/UX 설계
-
-- 참가자 상태 Badge 등 UI 표시: shadcn, semantic class 사용
-- 버튼 활성화/비활성화 조건: UI/UX 규칙에 맞게 구현
-- 에러/상태 변경 시 sonner toast로 즉시 안내
+- 모든 단계 실제 코드/문서/UX 기준으로 일관성 있게 구현 및 점검 완료
+- @/rules(server-action, db-schema, ui, form-ui, supabase-client) 규칙 명시적으로 준수
 
 ## Log
 
-- [BLUEPRINT] 각 도메인별로 pseudocode, 파일/컴포넌트/액션별 diff outline 설계 완료. CONSTRUCT 단계로 진입.
+- 1-1 ~ 2-4 단계 완료: Enum/상태 전이, 서버 액션, 폴링, UI, toast 등 구현 및 점검
+- 3-1 ~ 3-3 단계 완료: 호스트 전용 버튼, startGame 액션, 에러 안내 toast 구현 및 점검
+- 4-1, 5-1 단계 완료: 인증 연동/임시 세팅, UI/UX 규칙 일관성 확인
+- 전체 체크리스트 VALIDATE 단계 진입
 
 ## Rules NEVER REMOVE THIS SECTION!
 

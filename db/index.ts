@@ -58,12 +58,13 @@ export function createDrizzle(
           `);
           return await transaction(tx);
         } finally {
-          await tx.execute(sql`
-            -- reset
-            select set_config('request.jwt.claims', NULL, TRUE);
-            select set_config('request.jwt.claim.sub', NULL, TRUE);
-            reset role;
-            `);
+          // reset 쿼리 제거 (트랜잭션이 끝나면 자동으로 세션 설정이 초기화됨)
+          // await tx.execute(sql`
+          //   -- reset
+          //   select set_config('request.jwt.claims', NULL, TRUE);
+          //   select set_config('request.jwt.claim.sub', NULL, TRUE);
+          //   reset role;
+          //   `);
         }
       }, ...rest);
     }) as typeof client.transaction,

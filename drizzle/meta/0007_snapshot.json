@@ -1,0 +1,909 @@
+{
+  "id": "0f7a0fc1-cfd8-44c6-b6ca-b99e94e899ec",
+  "prevId": "f7ab3087-5d2b-431a-afa8-e94d11c252a5",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.game_rooms": {
+      "name": "game_rooms",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_participants": {
+          "name": "max_participants",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 8
+        },
+        "total_rounds": {
+          "name": "total_rounds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 3
+        },
+        "host_id": {
+          "name": "host_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "game_room_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'waiting'"
+        },
+        "last_activity_at": {
+          "name": "last_activity_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "game_rooms_code_unique": {
+          "name": "game_rooms_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "code"
+          ]
+        }
+      },
+      "policies": {
+        "Allow all select": {
+          "name": "Allow all select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true"
+        },
+        "Allow all insert": {
+          "name": "Allow all insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "withCheck": "true"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.matches": {
+      "name": "matches",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "game_room_id": {
+          "name": "game_room_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "participant1_id": {
+          "name": "participant1_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "participant2_id": {
+          "name": "participant2_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "matches_game_room_id_game_rooms_id_fk": {
+          "name": "matches_game_room_id_game_rooms_id_fk",
+          "tableFrom": "matches",
+          "tableTo": "game_rooms",
+          "columnsFrom": [
+            "game_room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "matches_participant1_id_participants_id_fk": {
+          "name": "matches_participant1_id_participants_id_fk",
+          "tableFrom": "matches",
+          "tableTo": "participants",
+          "columnsFrom": [
+            "participant1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "matches_participant2_id_participants_id_fk": {
+          "name": "matches_participant2_id_participants_id_fk",
+          "tableFrom": "matches",
+          "tableTo": "participants",
+          "columnsFrom": [
+            "participant2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "Allow all select": {
+          "name": "Allow all select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true"
+        },
+        "Allow all insert": {
+          "name": "Allow all insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "withCheck": "true"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.participants": {
+      "name": "participants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "game_room_id": {
+          "name": "game_room_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nickname": {
+          "name": "nickname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gender": {
+          "name": "gender",
+          "type": "gender",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mbti": {
+          "name": "mbti",
+          "type": "mbti",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "character": {
+          "name": "character",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "participant_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'joined'"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "participants_game_room_id_game_rooms_id_fk": {
+          "name": "participants_game_room_id_game_rooms_id_fk",
+          "tableFrom": "participants",
+          "tableTo": "game_rooms",
+          "columnsFrom": [
+            "game_room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "participants_user_id_users_id_fk": {
+          "name": "participants_user_id_users_id_fk",
+          "tableFrom": "participants",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "unique_nickname_per_room": {
+          "name": "unique_nickname_per_room",
+          "nullsNotDistinct": false,
+          "columns": [
+            "game_room_id",
+            "nickname"
+          ]
+        },
+        "unique_character_per_room": {
+          "name": "unique_character_per_room",
+          "nullsNotDistinct": false,
+          "columns": [
+            "game_room_id",
+            "character"
+          ]
+        }
+      },
+      "policies": {
+        "Allow all select": {
+          "name": "Allow all select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true"
+        },
+        "Allow all insert": {
+          "name": "Allow all insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "withCheck": "true"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.profiles": {
+      "name": "profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avatar_url": {
+          "name": "avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "marketing_data": {
+          "name": "marketing_data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "onboarding_completed_at": {
+          "name": "onboarding_completed_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_type": {
+          "name": "user_type",
+          "type": "user_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'GENERAL'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "profiles_user_id_users_id_fk": {
+          "name": "profiles_user_id_users_id_fk",
+          "tableFrom": "profiles",
+          "tableTo": "users",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "profiles_email_unique": {
+          "name": "profiles_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {
+        "Enable read access for all users": {
+          "name": "Enable read access for all users",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true"
+        },
+        "Enable insert for authenticated users only": {
+          "name": "Enable insert for authenticated users only",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "authenticated"
+          ],
+          "withCheck": "(select auth.uid()) = user_id"
+        },
+        "Enable update for users based on user_id": {
+          "name": "Enable update for users based on user_id",
+          "as": "PERMISSIVE",
+          "for": "UPDATE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.uid()) = user_id",
+          "withCheck": "(select auth.uid()) = user_id"
+        },
+        "Enable delete for users based on user_id": {
+          "name": "Enable delete for users based on user_id",
+          "as": "PERMISSIVE",
+          "for": "DELETE",
+          "to": [
+            "authenticated"
+          ],
+          "using": "(select auth.uid()) = user_id"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.questions": {
+      "name": "questions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "question_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "Enable read access for all users": {
+          "name": "Enable read access for all users",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.rounds": {
+      "name": "rounds",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "game_room_id": {
+          "name": "game_room_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "round_number": {
+          "name": "round_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "question_id": {
+          "name": "question_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "round_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'waiting'"
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ended_at": {
+          "name": "ended_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "free_time_started_at": {
+          "name": "free_time_started_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "selection_time_started_at": {
+          "name": "selection_time_started_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rounds_game_room_id_game_rooms_id_fk": {
+          "name": "rounds_game_room_id_game_rooms_id_fk",
+          "tableFrom": "rounds",
+          "tableTo": "game_rooms",
+          "columnsFrom": [
+            "game_room_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "rounds_question_id_questions_id_fk": {
+          "name": "rounds_question_id_questions_id_fk",
+          "tableFrom": "rounds",
+          "tableTo": "questions",
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "Allow all select": {
+          "name": "Allow all select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true"
+        },
+        "Allow all insert": {
+          "name": "Allow all insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "withCheck": "true"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.selections": {
+      "name": "selections",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "round_id": {
+          "name": "round_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "selector_participant_id": {
+          "name": "selector_participant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "selected_participant_id": {
+          "name": "selected_participant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "selections_round_id_rounds_id_fk": {
+          "name": "selections_round_id_rounds_id_fk",
+          "tableFrom": "selections",
+          "tableTo": "rounds",
+          "columnsFrom": [
+            "round_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "selections_selector_participant_id_participants_id_fk": {
+          "name": "selections_selector_participant_id_participants_id_fk",
+          "tableFrom": "selections",
+          "tableTo": "participants",
+          "columnsFrom": [
+            "selector_participant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "selections_selected_participant_id_participants_id_fk": {
+          "name": "selections_selected_participant_id_participants_id_fk",
+          "tableFrom": "selections",
+          "tableTo": "participants",
+          "columnsFrom": [
+            "selected_participant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {
+        "Allow all select": {
+          "name": "Allow all select",
+          "as": "PERMISSIVE",
+          "for": "SELECT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "true"
+        },
+        "Allow all insert": {
+          "name": "Allow all insert",
+          "as": "PERMISSIVE",
+          "for": "INSERT",
+          "to": [
+            "anon",
+            "authenticated"
+          ],
+          "withCheck": "true"
+        }
+      },
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    }
+  },
+  "enums": {
+    "public.game_room_status": {
+      "name": "game_room_status",
+      "schema": "public",
+      "values": [
+        "waiting",
+        "in_progress",
+        "completed",
+        "cancelled"
+      ]
+    },
+    "public.gender": {
+      "name": "gender",
+      "schema": "public",
+      "values": [
+        "male",
+        "female",
+        "other"
+      ]
+    },
+    "public.mbti": {
+      "name": "mbti",
+      "schema": "public",
+      "values": [
+        "INTJ",
+        "INTP",
+        "ENTJ",
+        "ENTP",
+        "INFJ",
+        "INFP",
+        "ENFJ",
+        "ENFP",
+        "ISTJ",
+        "ISFJ",
+        "ESTJ",
+        "ESFJ",
+        "ISTP",
+        "ISFP",
+        "ESTP",
+        "ESFP"
+      ]
+    },
+    "public.participant_status": {
+      "name": "participant_status",
+      "schema": "public",
+      "values": [
+        "joined",
+        "ready",
+        "playing",
+        "temporarily_away",
+        "left",
+        "finished"
+      ]
+    },
+    "public.question_category": {
+      "name": "question_category",
+      "schema": "public",
+      "values": [
+        "romance",
+        "friendship",
+        "personality",
+        "lifestyle",
+        "preferences",
+        "hypothetical"
+      ]
+    },
+    "public.round_status": {
+      "name": "round_status",
+      "schema": "public",
+      "values": [
+        "waiting",
+        "free_time",
+        "selection_time",
+        "completed"
+      ]
+    },
+    "public.user_type": {
+      "name": "user_type",
+      "schema": "public",
+      "values": [
+        "ADMIN",
+        "GENERAL"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
