@@ -12,7 +12,13 @@ interface ParticipantCardProps {
     gender: "male" | "female" | "other";
     mbti: string;
     character: string;
-    status: "joined" | "ready" | "playing" | "finished";
+    status:
+      | "joined"
+      | "ready"
+      | "playing"
+      | "temporarily_away"
+      | "left"
+      | "finished";
   };
   isHost?: boolean;
   canTransferHost?: boolean;
@@ -27,27 +33,46 @@ export function ParticipantCard({
 }: ParticipantCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "ready": return "bg-green-500";
-      case "playing": return "bg-blue-500";
-      case "finished": return "bg-gray-500";
-      default: return "bg-yellow-500";
+      case "ready":
+        return "bg-green-500";
+      case "playing":
+        return "bg-blue-500";
+      case "finished":
+        return "bg-gray-500";
+      case "temporarily_away":
+        return "bg-orange-500";
+      case "left":
+        return "bg-red-500";
+      default:
+        return "bg-yellow-500";
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "ready": return "준비완료";
-      case "playing": return "플레이중";
-      case "finished": return "완료";
-      default: return "대기중";
+      case "ready":
+        return "준비완료";
+      case "playing":
+        return "플레이중";
+      case "finished":
+        return "완료";
+      case "temporarily_away":
+        return "일시이탈";
+      case "left":
+        return "나감";
+      default:
+        return "대기중";
     }
   };
 
   const getGenderIcon = (gender: string) => {
     switch (gender) {
-      case "male": return "♂️";
-      case "female": return "♀️";
-      default: return "⚧️";
+      case "male":
+        return "♂️";
+      case "female":
+        return "♀️";
+      default:
+        return "⚧️";
     }
   };
 
@@ -79,15 +104,19 @@ export function ParticipantCard({
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
-              <div className={`w-2 h-2 rounded-full ${getStatusColor(participant.status)}`} />
+              <div
+                className={`w-2 h-2 rounded-full ${getStatusColor(
+                  participant.status
+                )}`}
+              />
               <span className="text-xs text-muted-foreground">
                 {getStatusText(participant.status)}
               </span>
             </div>
-            
+
             {canTransferHost && !isHost && (
               <Button
                 variant="outline"

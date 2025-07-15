@@ -30,7 +30,13 @@ interface WaitingRoomProps {
     gender: "male" | "female" | "other";
     mbti: string;
     character: string;
-    status: "joined" | "ready" | "playing" | "finished";
+    status:
+      | "joined"
+      | "ready"
+      | "playing"
+      | "temporarily_away"
+      | "left"
+      | "finished";
   }>;
   roomCode: string;
 }

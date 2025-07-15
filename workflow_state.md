@@ -12,11 +12,11 @@ RUNNING
 
 ## Items
 
-- [ ] **1. Main Pages & Layout Implementation**
+- [x] **1. Main Pages & Layout Implementation**
 
-  - [ ] 1-1. Create improved homepage with game introduction and main action buttons
-  - [ ] 1-2. Implement global layout with providers, theming, and metadata
-  - [ ] 1-3. Set up error boundaries and loading states
+  - [x] 1-1. Create improved homepage with game introduction and main action buttons
+  - [x] 1-2. Implement global layout with providers, theming, and metadata
+  - [x] 1-3. Set up error boundaries and loading states
 
 - [ ] **2. Game Room Pages Implementation**
 
@@ -212,6 +212,15 @@ Moving to BLUEPRINT phase...
 ✅ Defined component structure, state management, routing, and optimization strategies
 
 **CONSTRUCT Phase - Starting Item 1: Main Pages & Layout Implementation**
+
+**Item 1 COMPLETED**: Main Pages & Layout Implementation
+✅ 1-1. Created improved homepage with game intro, features, how-to-play, stats, and CTA sections
+✅ 1-2. Implemented global layout with Korean locale, comprehensive metadata, SEO tags, and Sonner toaster
+✅ 1-3. Added ErrorBoundary component with user-friendly error UI and recovery options
+✅ Added loading.tsx with branded loading animation and progress indicators
+✅ ESLint validation passed, git committed
+
+**Starting Item 2: Game Room Pages Implementation**
 
 ## ArchiveLog
 
