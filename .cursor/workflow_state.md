@@ -4,53 +4,113 @@ _Last updated: 2025-01-21_
 
 ## Phase
 
-VALIDATE
+CONSTRUCT
 
 ## Status
 
-COMPLETED
+RUNNING
 
 ## Items
 
-- [x] **1. Implement Database Schema Definition**
-  - [x] 1-1. Define core tables with proper relationships
-  - [x] 1-2. Implement RLS policies for security
-- [x] **2. Setup Database Connection and Client**
-  - [x] 2-1. Complete Drizzle RLS client setup
-  - [x] 2-2. Test database connection functionality
-- [x] **3. Create Initial Data Seed**
-  - [x] 3-1. Create seed file with questions and characters
-  - [x] 3-2. Implement seed execution script
-- [x] **4. Configure Migration System**
-  - [x] 4-1. Test migration commands
-  - [x] 4-2. Validate complete schema deployment
+- [ ] **1. Backend Schema & Actions Implementation**
+  - [x] 1-1. Define participant management schemas (profile, character, MBTI, status)
+  - [ ] 1-2. Implement create participant server actions
+  - [ ] 1-3. Implement update participant server actions
+  - [ ] 1-4. Implement fetch participant server actions
+  - [ ] 1-5. Implement validation server actions
+- [ ] **2. Frontend UI Components Implementation**
+  - [ ] 2-1. Create participant profile form component
+  - [ ] 2-2. Create character gallery component
+  - [ ] 2-3. Create MBTI quiz component
+  - [ ] 2-4. Create participant avatar and list components
+  - [ ] 2-5. Create status indicator and gender balance components
+- [ ] **3. Business Logic Components**
+  - [ ] 3-1. Create participant manager container component
+  - [ ] 3-2. Create character and nickname validators
+- [ ] **4. Data Validation & Security**
+  - [ ] 4-1. Implement input validation for nicknames, characters, MBTI
+  - [ ] 4-2. Implement access control and security measures
+
+## Plan
+
+### Backend Schema & Actions Strategy
+
+**1. Domain Structure Setup**
+
+- Create `domains/participant/` directory structure
+- Define schemas using zod for validation
+- Create server actions using Drizzle RLS client
+
+**2. Schema Files (`domains/participant/schemas/`)**
+
+- `participant-profile.schema.ts`: nickname (2-8 chars), gender validation
+- `character-selection.schema.ts`: 20 animal character validation
+- `mbti-selection.schema.ts`: 16 MBTI types validation
+- `participant-status.schema.ts`: status changes (active/temporarily_away/left)
+
+**3. Server Actions (`domains/participant/actions/`)**
+
+- `create.action.ts`: createParticipant, validateNickname
+- `update.action.ts`: updateParticipantProfile, updateParticipantStatus, updateCharacter
+- `fetch.action.ts`: getParticipantsByRoom, getParticipantProfile, getAvailableCharacters
+- `validation.action.ts`: checkCharacterAvailability, validateParticipantCapacity
+
+### Frontend UI Components Strategy
+
+**1. Form Components**
+
+- Use react-hook-form with zod validation
+- Follow form-ui rules for controller pattern
+- Use shadcn UI components
+
+**2. Component Structure (`domains/participant/components/`)**
+
+- `participant-profile-form.tsx`: nickname, gender input form
+- `character-gallery.tsx`: grid layout with selection states
+- `mbti-quiz.tsx`: 16 types categorized display
+- `participant-avatar.tsx`: character + nickname display
+- `participant-list.tsx`: waiting room participant list
+- `participant-status-indicator.tsx`: online/away status
+- `gender-balance-indicator.tsx`: male/female ratio display
+
+**3. Business Logic Components**
+
+- `participant-manager.tsx`: container with state management
+- `character-validator.tsx`: character duplication logic
+- `nickname-validator.tsx`: nickname validation logic
+
+### Security & Validation
+
+- Use existing RLS policies in participants table
+- Implement server-side validation for all inputs
+- Ensure anonymity while providing game-necessary info
 
 ## Log
 
-**Phase: ANALYZE**: Read relevant rule files - supabase-client.rules.mdc, db-schema.rules.mdc, server-action.rules.mdc. Current state: db/schema.ts is empty, db/index.ts has partial RLS client implementation, package.json has necessary dependencies and scripts.
+**Phase: ANALYZE**:
 
-**Phase: BLUEPRINT**: Decomposed task into 4 main items with detailed implementation strategy. Ready to begin CONSTRUCT phase.
+- ✅ Read server-action.rules.mdc - using createDrizzleSupabaseClient for RLS
+- ✅ Read db-schema.rules.mdc - RLS policies and schema patterns
+- ✅ Read ui.rules.mdc - client/server component separation, shadcn usage
+- ✅ Read form-ui.rules.mdc - react-hook-form with zod validation
+- ✅ Analyzed current DB schema - participants table exists with enums
+- ✅ Checked domain structure - auth domain exists as reference
+- ✅ Reviewed task requirements - comprehensive participant management system
+
+**Phase: BLUEPRINT**: Decomposed task into 4 main items with detailed implementation strategy.
 
 **Phase: CONSTRUCT**:
 
-- ✅ Item 1-1: Defined all core tables (game_rooms, participants, questions, rounds, selections, matches) with proper relationships and constraints
-- ✅ Item 1-2: Implemented comprehensive RLS policies for security and privacy protection
-- ✅ Item 2-1: Database connection setup already completed in db/index.ts with createDrizzleSupabaseClient function
-- ✅ Item 2-2: RLS client with proper token handling and auth context implemented
-- ✅ Item 3-1: Created db/seed.ts with 100 questions across 6 categories and 20 character data
-- ✅ Item 3-2: Added db:seed script and seedDatabase execution function
-- ✅ Item 4-1: Successfully ran migration commands - generated drizzle/0000_neat_killraven.sql with all tables, RLS policies, and foreign key constraints
-- ✅ Item 4-2: Validated complete schema deployment - all 6 tables created, TypeScript types generated, and seed data inserted successfully
+- ✅ Item 1-1: Created participant management schemas (profile, character, MBTI, status)
+  - Created domains/participant/schemas/ directory structure
+  - participant-profile.schema.ts: nickname 2-8 chars, gender validation
+  - character-selection.schema.ts: 20 animal character validation
+  - mbti-selection.schema.ts: 16 MBTI types with categories and descriptions
+  - participant-status.schema.ts: status changes (joined/ready/playing/finished)
+  - All schemas use zod validation with proper TypeScript types
+  - ESLint validation passed successfully
 
-**Phase: VALIDATE**:
-
-- ✅ ESLint validation passed with no warnings or errors
-- ✅ TypeScript compilation check passed without type errors
-- ✅ Database schema successfully deployed with all RLS policies
-- ✅ All 100 questions seeded into database
-- ✅ Complete system validation successful
-
-**Task Status**: Database schema setup for loveline game completed successfully. All core tables (game_rooms, participants, questions, rounds, selections, matches) implemented with proper RLS security policies, foreign key relationships, and initial seed data.
+Starting Item 1-2: Create participant server actions
 
 ## ArchiveLog
 
