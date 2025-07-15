@@ -10,7 +10,7 @@ export const participantProfileSchema = z.object({
       "닉네임은 한글, 영문, 숫자, 공백만 사용 가능합니다"
     ),
   gender: z.enum(["male", "female", "other"]),
-  gameRoomId: z.string().uuid("유효한 게임방 ID가 아닙니다"),
+  gameRoomId: z.uuid("유효한 게임방 ID가 아닙니다"),
 });
 
 export type ParticipantProfileInput = z.infer<typeof participantProfileSchema>;

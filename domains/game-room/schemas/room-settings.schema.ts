@@ -8,7 +8,7 @@ export const roomSettingsSchema = z.object({
 export type RoomSettingsInput = z.infer<typeof roomSettingsSchema>;
 
 export const transferHostSchema = z.object({
-  newHostParticipantId: z.string().uuid(),
+  newHostParticipantId: z.uuid(),
 });
 
 export type TransferHostInput = z.infer<typeof transferHostSchema>;

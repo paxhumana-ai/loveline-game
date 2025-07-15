@@ -14,7 +14,7 @@ export const participantStatusSchema = z.object({
 export type ParticipantStatusInput = z.infer<typeof participantStatusSchema>;
 
 export const participantStatusUpdateSchema = z.object({
-  participantId: z.string().uuid("유효한 참가자 ID가 아닙니다"),
+  participantId: z.uuid("유효한 참가자 ID가 아닙니다"),
   status: z.enum(PARTICIPANT_STATUS),
 });
 

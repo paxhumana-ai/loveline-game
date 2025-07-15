@@ -25,7 +25,7 @@ export const AVAILABLE_CHARACTERS = [
 
 export const characterSelectionSchema = z.object({
   character: z.enum(AVAILABLE_CHARACTERS),
-  gameRoomId: z.string().uuid("유효한 게임방 ID가 아닙니다"),
+  gameRoomId: z.uuid("유효한 게임방 ID가 아닙니다"),
 });
 
 export type CharacterSelectionInput = z.infer<typeof characterSelectionSchema>;
