@@ -4,123 +4,38 @@ _Last updated: 2025-01-21_
 
 ## Phase
 
-CONSTRUCT
+ANALYZE
 
 ## Status
 
-RUNNING
+COMPLETED
 
 ## Items
 
-- [x] **1. Backend Schema & Actions Implementation**
-  - [x] 1-1. Define participant management schemas (profile, character, MBTI, status)
-  - [x] 1-2. Implement create participant server actions
-  - [x] 1-3. Implement update participant server actions
-  - [x] 1-4. Implement fetch participant server actions
-  - [x] 1-5. Implement validation server actions
-- [x] **2. Frontend UI Components Implementation**
-  - [x] 2-1. Create participant profile form component
-  - [x] 2-2. Create character gallery component
-  - [x] 2-3. Create MBTI quiz component
-  - [x] 2-4. Create participant avatar and list components
-  - [x] 2-5. Create status indicator and gender balance components
-- [ ] **3. Business Logic Components**
-  - [ ] 3-1. Create participant manager container component
-  - [ ] 3-2. Create character and nickname validators
-- [ ] **4. Data Validation & Security**
-  - [ ] 4-1. Implement input validation for nicknames, characters, MBTI
-  - [ ] 4-2. Implement access control and security measures
+- [x] **1. GameRoom 도메인 유저플로우 검증**
+  - [x] 1-1. 방 생성/입장/대기실 플로우 PRD 일치 여부 검증
+  - [x] 1-2. 참가자 상태/정원/중복(닉네임, 캐릭터) 처리 검증
+  - [x] 1-3. 게임 시작/진행/라운드 상태 전이(대기→진행→완료) 검증
+  - [x] 1-4. 참가자 이탈/재참여/호스트 이양/방 삭제 엣지케이스 검증
+  - [x] 1-5. 사용되지 않는 파일/코드(Dead Code) 존재 여부 점검
 
 ## Plan
 
-### Backend Schema & Actions Strategy
+### GameRoom 도메인 유저플로우 검증 전략
 
-**1. Domain Structure Setup**
-
-- Create `domains/participant/` directory structure
-- Define schemas using zod for validation
-- Create server actions using Drizzle RLS client
-
-**2. Schema Files (`domains/participant/schemas/`)**
-
-- `participant-profile.schema.ts`: nickname (2-8 chars), gender validation
-- `character-selection.schema.ts`: 20 animal character validation
-- `mbti-selection.schema.ts`: 16 MBTI types validation
-- `participant-status.schema.ts`: status changes (active/temporarily_away/left)
-
-**3. Server Actions (`domains/participant/actions/`)**
-
-- `create.action.ts`: createParticipant, validateNickname
-- `update.action.ts`: updateParticipantProfile, updateParticipantStatus, updateCharacter
-- `fetch.action.ts`: getParticipantsByRoom, getParticipantProfile, getAvailableCharacters
-- `validation.action.ts`: checkCharacterAvailability, validateParticipantCapacity
-
-### Frontend UI Components Strategy
-
-**1. Form Components**
-
-- Use react-hook-form with zod validation
-- Follow form-ui rules for controller pattern
-- Use shadcn UI components
-
-**2. Component Structure (`domains/participant/components/`)**
-
-- `participant-profile-form.tsx`: nickname, gender input form
-- `character-gallery.tsx`: grid layout with selection states
-- `mbti-quiz.tsx`: 16 types categorized display
-- `participant-avatar.tsx`: character + nickname display
-- `participant-list.tsx`: waiting room participant list
-- `participant-status-indicator.tsx`: online/away status
-- `gender-balance-indicator.tsx`: male/female ratio display
-
-**3. Business Logic Components**
-
-- `participant-manager.tsx`: container with state management
-- `character-validator.tsx`: character duplication logic
-- `nickname-validator.tsx`: nickname validation logic
-
-### Security & Validation
-
-- Use existing RLS policies in participants table
-- Implement server-side validation for all inputs
-- Ensure anonymity while providing game-necessary info
+1. PRD의 유저플로우(방 생성, 입장, 대기, 진행, 이탈, 재참여, 호스트 이양 등)와 실제 코드(액션, 컴포넌트, 훅, 스키마) 매핑
+2. 각 단계별로 엣지케이스(정원 초과, 중복, 상태 불일치, 권한 문제 등) 처리 로직 확인
+3. 사용되지 않는 파일/코드가 남아있는지 grep 및 import 추적
+4. 규칙 파일(.cursor/rules)에서 관련 코드 규칙 준수 여부 확인
 
 ## Log
 
-**Phase: ANALYZE**:
-
-- ✅ Read server-action.rules.mdc - using createDrizzleSupabaseClient for RLS
-- ✅ Read db-schema.rules.mdc - RLS policies and schema patterns
-- ✅ Read ui.rules.mdc - client/server component separation, shadcn usage
-- ✅ Read form-ui.rules.mdc - react-hook-form with zod validation
-- ✅ Analyzed current DB schema - participants table exists with enums
-- ✅ Checked domain structure - auth domain exists as reference
-- ✅ Reviewed task requirements - comprehensive participant management system
-
-**Phase: BLUEPRINT**: Decomposed task into 4 main items with detailed implementation strategy.
-
-**Phase: CONSTRUCT**:
-
-- ✅ Item 1: Backend Schema & Actions Implementation COMPLETED
-
-  - ✅ Item 1-1: Created participant management schemas (profile, character, MBTI, status)
-  - ✅ Item 1-2: Implemented create participant server actions (createParticipant, validateNickname)
-  - ✅ Item 1-3: Implemented update participant server actions (updateParticipantProfile, updateParticipantStatus, updateCharacter)
-  - ✅ Item 1-4: Implemented fetch participant server actions (getParticipantsByRoom, getParticipantProfile, getAvailableCharacters)
-  - ✅ Item 1-5: Implemented validation server actions (checkCharacterAvailability, validateParticipantCapacity, validateGameRoomAccess)
-  - All server actions follow RLS patterns and use createDrizzleSupabaseClient
-  - ESLint validation passed, committed to git
-
-- ✅ Item 2: Frontend UI Components Implementation COMPLETED
-  - ✅ Item 2-1: Created participant profile form with nickname validation and gender selection
-  - ✅ Item 2-2: Created character gallery with grid layout and availability checking
-  - ✅ Item 2-3: Created MBTI quiz with 16 types categorized by personality groups
-  - ✅ Item 2-4: Created participant avatar and list components with status indicators
-  - ✅ Item 2-5: Created status indicator and gender balance components
-  - All components follow shadcn UI patterns and use proper form validation
-  - ESLint validation passed, committed to git
-
-Starting Item 3-1: Create participant manager container component
+- PHASE: ANALYZE 시작. GameRoom 도메인 유저플로우 및 엣지케이스, Dead Code 점검 준비.
+- [1-1] 방 생성/입장/대기실 플로우: create.action.ts, join.action.ts, fetch.action.ts, waiting-room.tsx 등에서 PRD와 일치하게 구현됨. 방 코드 중복, 정원 초과, 대기 상태 등 엣지케이스 처리도 정상. UI/서버 분리 및 폴링 구조도 PRD와 부합.
+- [1-2] 참가자 상태/정원/중복 처리: join.action.ts에서 참가자 정원, 닉네임/캐릭터 중복, 방 상태(대기 중) 등 검증 로직이 PRD와 일치. validation.action.ts 등에서 추가 중복 체크 및 상태 관리도 정상 동작.
+- [1-3] 게임 시작/진행/라운드 상태 전이: update.action.ts에서 게임 시작 조건(모두 준비, 최소 인원) 및 상태 전이(대기→진행→완료) 로직이 PRD와 일치. 라운드/참가자 상태 동기화 및 엣지케이스(미준비, 인원 부족) 처리도 정상.
+- [1-4] 참가자 이탈/재참여/호스트 이양/방 삭제: leave.action.ts에서 임시/완전 이탈, 호스트 이양, 마지막 참가자 퇴장 시 방 삭제 등 PRD 엣지케이스 모두 처리. 권한/상태 검증 및 트랜잭션 처리도 정상.
+- [1-5] Dead Code 점검: game-room 도메인 내 모든 파일/익스포트가 실제 사용되고 있음. AVAILABLE_CHARACTERS, MBTI_LABELS 등도 정상 참조. app/room/[code] 및 하위 디렉토리에도 미사용 파일 없음.
 
 ## ArchiveLog
 
