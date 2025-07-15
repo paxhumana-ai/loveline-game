@@ -19,7 +19,14 @@ interface ParticipantData {
   id: string;
   nickname: string;
   character: string;
-  status: "joined" | "ready" | "playing" | "finished";
+  gender: "male" | "female" | "other";
+  status:
+    | "joined"
+    | "ready"
+    | "playing"
+    | "temporarily_away"
+    | "left"
+    | "finished";
   createdAt: Date;
   updatedAt: Date;
 }

@@ -40,6 +40,7 @@ export async function getGameRoomByCode(roomCode: string): Promise<{
           updatedAt: participants.updatedAt,
           gameRoomId: participants.gameRoomId,
           userId: participants.userId,
+          lastSeenAt: participants.lastSeenAt, // 추가: lastSeenAt 필드 포함
         })
         .from(participants)
         .where(eq(participants.gameRoomId, gameRoom.id));
@@ -95,6 +96,7 @@ export async function getGameRoomStatus(gameRoomId: string): Promise<{
           totalRounds: gameRooms.totalRounds,
           hostId: gameRooms.hostId,
           status: gameRooms.status,
+          lastActivityAt: gameRooms.lastActivityAt, // 추가: lastActivityAt 필드 포함
           createdAt: gameRooms.createdAt,
           updatedAt: gameRooms.updatedAt,
         })

@@ -14,7 +14,7 @@ export type RoundInfo = {
   id: string;
   gameRoomId: string;
   roundNumber: number;
-  status: "pending" | "active" | "completed";
+  status: "waiting" | "free_time" | "selection_time" | "completed";
   startedAt: Date | null;
   endedAt: Date | null;
   question: {
@@ -72,7 +72,7 @@ export async function getCurrentRound(
         .from(rounds)
         .innerJoin(questions, eq(rounds.questionId, questions.id))
         .where(
-          and(eq(rounds.gameRoomId, gameRoomId), eq(rounds.status, "active"))
+          and(eq(rounds.gameRoomId, gameRoomId), eq(rounds.status, "free_time"))
         )
         .orderBy(desc(rounds.roundNumber))
         .limit(1);

@@ -55,7 +55,11 @@ export async function startRound(
         )
         .limit(1);
 
-      if (existingRound.length && existingRound[0].status === "active") {
+      if (
+        existingRound.length &&
+        (existingRound[0].status === "free_time" ||
+          existingRound[0].status === "selection_time")
+      ) {
         return { success: false, error: "Round is already active" };
       }
 
@@ -83,7 +87,7 @@ export async function startRound(
           .update(rounds)
           .set({
             questionId: selectedQuestion.id,
-            status: "active",
+            status: "free_time",
             startedAt: new Date(),
             endedAt: null,
             updatedAt: new Date(),
@@ -97,7 +101,7 @@ export async function startRound(
             gameRoomId,
             roundNumber,
             questionId: selectedQuestion.id,
-            status: "active",
+            status: "free_time",
             startedAt: new Date(),
           })
           .returning({ id: rounds.id });
@@ -150,7 +154,10 @@ export async function endRound(input: EndRoundInput): Promise<ActionResult> {
         return { success: false, error: "Round not found" };
       }
 
-      if (round[0].status !== "active") {
+      if (
+        round[0].status !== "free_time" &&
+        round[0].status !== "selection_time"
+      ) {
         return { success: false, error: "Round is not active" };
       }
 
@@ -208,7 +215,10 @@ export async function pauseRound(
         return { success: false, error: "Round not found" };
       }
 
-      if (round[0].status !== "active") {
+      if (
+        round[0].status !== "free_time" &&
+        round[0].status !== "selection_time"
+      ) {
         return { success: false, error: "Round is not active" };
       }
 
@@ -260,7 +270,10 @@ export async function resumeRound(
         return { success: false, error: "Round not found" };
       }
 
-      if (round[0].status !== "active") {
+      if (
+        round[0].status !== "free_time" &&
+        round[0].status !== "selection_time"
+      ) {
         return { success: false, error: "Round is not active" };
       }
 

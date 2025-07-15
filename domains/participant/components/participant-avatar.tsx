@@ -8,7 +8,13 @@ import { cn } from "@/lib/utils";
 interface ParticipantAvatarProps {
   character: string;
   nickname: string;
-  status?: "joined" | "ready" | "playing" | "finished";
+  status?:
+    | "joined"
+    | "ready"
+    | "playing"
+    | "temporarily_away"
+    | "left"
+    | "finished";
   size?: "sm" | "md" | "lg";
   variant?: "default" | "card" | "minimal";
   showStatus?: boolean;
@@ -25,6 +31,8 @@ const statusColors = {
   joined: "bg-blue-500",
   ready: "bg-green-500",
   playing: "bg-yellow-500",
+  temporarily_away: "bg-orange-400",
+  left: "bg-red-400",
   finished: "bg-gray-500",
 };
 
@@ -32,6 +40,8 @@ const statusLabels = {
   joined: "참가",
   ready: "준비",
   playing: "게임 중",
+  temporarily_away: "일시이탈",
+  left: "퇴장",
   finished: "완료",
 };
 

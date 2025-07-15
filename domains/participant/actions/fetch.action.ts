@@ -15,10 +15,11 @@ export async function getParticipantsByRoom(gameRoomId: string) {
           id: participants.id,
           nickname: participants.nickname,
           character: participants.character,
+          gender: participants.gender, // 추가: gender 필드 포함
           status: participants.status,
           createdAt: participants.createdAt,
           updatedAt: participants.updatedAt,
-          // Exclude MBTI and gender for privacy
+          // Exclude MBTI for privacy
         })
         .from(participants)
         .where(eq(participants.gameRoomId, gameRoomId))
