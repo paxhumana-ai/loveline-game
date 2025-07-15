@@ -233,7 +233,7 @@ export function TimerController({
         setUpdateInterval(null);
       }
     }
-  }, [timerStatus?.state, fetchTimerStatus]);
+  }, [timerStatus?.state, fetchTimerStatus, updateInterval]);
 
   // Initial fetch
   useEffect(() => {

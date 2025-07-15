@@ -1,383 +1,204 @@
 "use server";
 
-import { eq, and } from "drizzle-orm";
 import { createDrizzleSupabaseClient } from "@/db";
-import { gameRooms, rounds } from "@/db/schema";
-import {
-  startTimerSchema,
-  timerControlSchema,
-  getRemainingTimeSchema,
-  getDefaultDuration,
-  calculateRemainingTime,
-  shouldShowWarning,
-  TIMER_DURATIONS,
-  type StartTimerInput,
-  type TimerControlInput,
-  type GetRemainingTimeInput,
-  type TimerStatusOutput,
-  type TimeWarningOutput,
-  type TimerPhase,
-} from "../schemas";
+import { rounds } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-type ActionResult<T = unknown> = {
-  success: boolean;
-  data?: T;
-  error?: string | Record<string, string[]>;
-};
-
-// In-memory timer state (for production, consider using Redis or similar)
-const timerStates = new Map<
-  string,
-  {
-    roundId: string;
-    phase: TimerPhase;
-    startedAt: Date;
-    duration: number;
-    isPaused: boolean;
-    pausedAt?: Date;
-    totalPausedTime: number;
-  }
->();
-
-export async function startTimer(
-  input: StartTimerInput
-): Promise<ActionResult<TimerStatusOutput>> {
+export async function startFreeTime(roundId: string) {
   try {
-    // Validate input
-    const validatedInput = startTimerSchema.parse(input);
-    const { roundId, gameRoomId, phase, duration } = validatedInput;
-
     const db = await createDrizzleSupabaseClient();
 
-    return await db.rls(async (tx) => {
-      // Verify user is host of the game room
-      const gameRoom = await tx
-        .select({ hostId: gameRooms.hostId })
-        .from(gameRooms)
-        .where(eq(gameRooms.id, gameRoomId))
-        .limit(1);
+    const updatedRound = await db.rls((tx) =>
+      tx
+        .update(rounds)
+        .set({
+          status: "free_time",
+          freeTimeStartedAt: new Date(),
+          startedAt: new Date(), // Mark round as started
+          updatedAt: new Date(),
+        })
+        .where(eq(rounds.id, roundId))
+        .returning({
+          id: rounds.id,
+          status: rounds.status,
+          freeTimeStartedAt: rounds.freeTimeStartedAt,
+          startedAt: rounds.startedAt,
+        })
+    );
 
-      if (!gameRoom.length) {
-        return { success: false, error: "Game room not found" };
-      }
-
-      // Verify round exists and is active
-      const round = await tx
-        .select({ id: rounds.id, status: rounds.status })
-        .from(rounds)
-        .where(and(eq(rounds.id, roundId), eq(rounds.gameRoomId, gameRoomId)))
-        .limit(1);
-
-      if (!round.length) {
-        return { success: false, error: "Round not found" };
-      }
-
-      if (round[0].status !== "active") {
-        return { success: false, error: "Round is not active" };
-      }
-
-      // Set timer duration
-      const timerDuration = duration ?? getDefaultDuration(phase);
-      const startedAt = new Date();
-
-      // Store timer state
-      const timerKey = `${roundId}-${phase}`;
-      timerStates.set(timerKey, {
-        roundId,
-        phase,
-        startedAt,
-        duration: timerDuration,
-        isPaused: false,
-        totalPausedTime: 0,
-      });
-
-      const timerStatus: TimerStatusOutput = {
-        roundId,
-        phase,
-        state: "running",
-        remainingTime: timerDuration,
-        totalDuration: timerDuration,
-        startedAt,
+    if (updatedRound.length === 0) {
+      return {
+        success: false,
+        error: "Round not found or no permission to update",
+        data: null,
       };
+    }
 
-      return { success: true, data: timerStatus };
-    });
+    return {
+      success: true,
+      error: null,
+      data: updatedRound[0],
+    };
   } catch (error) {
-    console.error("Error starting timer:", error);
+    console.error("Error starting free time:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to start timer",
+      error: "Failed to start free time",
+      data: null,
     };
   }
 }
 
-export async function getRemainingTime(
-  input: GetRemainingTimeInput
-): Promise<ActionResult<TimerStatusOutput | null>> {
-  try {
-    // Validate input
-    const validatedInput = getRemainingTimeSchema.parse(input);
-    const { roundId, phase } = validatedInput;
-
-    // If phase is not specified, try to find any active timer for this round
-    let timerKey: string | undefined;
-    let timerState:
-      | (typeof timerStates extends Map<string, infer V> ? V : never)
-      | undefined;
-
-    if (phase) {
-      timerKey = `${roundId}-${phase}`;
-      timerState = timerStates.get(timerKey);
-    } else {
-      // Find any timer for this round
-      const foundEntry = Array.from(timerStates.entries()).find(([key]) =>
-        key.startsWith(`${roundId}-`)
-      );
-      if (foundEntry) {
-        [timerKey, timerState] = foundEntry;
-      }
-    }
-
-    if (!timerState) {
-      return { success: true, data: null };
-    }
-
-    let remainingTime: number;
-
-    if (timerState.isPaused) {
-      // If paused, calculate time remaining when paused
-      const timeElapsedBeforePause = timerState.pausedAt
-        ? Math.floor(
-            (timerState.pausedAt.getTime() - timerState.startedAt.getTime()) /
-              1000
-          )
-        : 0;
-      remainingTime = Math.max(
-        0,
-        timerState.duration -
-          timeElapsedBeforePause -
-          timerState.totalPausedTime
-      );
-    } else {
-      remainingTime =
-        calculateRemainingTime(timerState.startedAt, timerState.duration) -
-        timerState.totalPausedTime;
-    }
-
-    const timerStatus: TimerStatusOutput = {
-      roundId: timerState.roundId,
-      phase: timerState.phase,
-      state: timerState.isPaused
-        ? "paused"
-        : remainingTime <= 0
-        ? "expired"
-        : "running",
-      remainingTime: Math.max(0, remainingTime),
-      totalDuration: timerState.duration,
-      startedAt: timerState.startedAt,
-    };
-
-    return { success: true, data: timerStatus };
-  } catch (error) {
-    console.error("Error getting remaining time:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to get remaining time",
-    };
-  }
-}
-
-export async function controlTimer(
-  input: TimerControlInput
-): Promise<ActionResult<TimerStatusOutput | null>> {
-  try {
-    // Validate input
-    const validatedInput = timerControlSchema.parse(input);
-    const { roundId, gameRoomId, action } = validatedInput;
-
-    const db = await createDrizzleSupabaseClient();
-
-    return await db.rls(async (tx) => {
-      // Verify user is host of the game room
-      const gameRoom = await tx
-        .select({ hostId: gameRooms.hostId })
-        .from(gameRooms)
-        .where(eq(gameRooms.id, gameRoomId))
-        .limit(1);
-
-      if (!gameRoom.length) {
-        return { success: false, error: "Game room not found" };
-      }
-
-      // Find active timer for this round
-      const timerEntry = Array.from(timerStates.entries()).find(([key]) =>
-        key.startsWith(`${roundId}-`)
-      );
-
-      if (!timerEntry && action !== "start") {
-        return { success: false, error: "No active timer found" };
-      }
-
-      const [timerKey, timerState] = timerEntry || [null, null];
-
-      switch (action) {
-        case "pause":
-          if (timerState && !timerState.isPaused) {
-            timerState.isPaused = true;
-            timerState.pausedAt = new Date();
-          }
-          break;
-
-        case "resume":
-          if (timerState && timerState.isPaused) {
-            if (timerState.pausedAt) {
-              const pauseDuration = Math.floor(
-                (Date.now() - timerState.pausedAt.getTime()) / 1000
-              );
-              timerState.totalPausedTime += pauseDuration;
-            }
-            timerState.isPaused = false;
-            timerState.pausedAt = undefined;
-          }
-          break;
-
-        case "stop":
-        case "reset":
-          if (timerKey) {
-            timerStates.delete(timerKey);
-          }
-          return { success: true, data: null };
-
-        default:
-          return { success: false, error: "Invalid timer action" };
-      }
-
-      // Return current timer status
-      if (timerState) {
-        const remainingTimeResult = await getRemainingTime({ roundId });
-        return remainingTimeResult;
-      }
-
-      return { success: true, data: null };
-    });
-  } catch (error) {
-    console.error("Error controlling timer:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to control timer",
-    };
-  }
-}
-
-export async function checkTimeWarning(
-  roundId: string
-): Promise<ActionResult<TimeWarningOutput | null>> {
-  try {
-    // Get current timer status
-    const statusResult = await getRemainingTime({ roundId });
-
-    if (!statusResult.success || !statusResult.data) {
-      return { success: true, data: null };
-    }
-
-    const timerStatus = statusResult.data;
-    const warningLevel = shouldShowWarning(timerStatus.remainingTime);
-
-    if (!warningLevel) {
-      return { success: true, data: null };
-    }
-
-    const timeWarning: TimeWarningOutput = {
-      roundId,
-      phase: timerStatus.phase,
-      remainingTime: timerStatus.remainingTime,
-      warningLevel,
-    };
-
-    return { success: true, data: timeWarning };
-  } catch (error) {
-    console.error("Error checking time warning:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to check time warning",
-    };
-  }
-}
-
-export async function handleTimeOut(roundId: string): Promise<ActionResult> {
-  try {
-    // Get current timer status
-    const statusResult = await getRemainingTime({ roundId });
-
-    if (!statusResult.success || !statusResult.data) {
-      return { success: false, error: "No active timer found" };
-    }
-
-    const timerStatus = statusResult.data;
-
-    if (timerStatus.remainingTime > 0) {
-      return { success: false, error: "Timer has not expired yet" };
-    }
-
-    // Clean up timer state
-    const timerKey = `${roundId}-${timerStatus.phase}`;
-    timerStates.delete(timerKey);
-
-    // Timer has expired - this would trigger the next phase or round completion
-    // The actual phase transition logic should be handled by the calling code
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error handling timeout:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to handle timeout",
-    };
-  }
-}
-
-export async function clearAllTimers(
-  gameRoomId: string
-): Promise<ActionResult> {
+export async function startSelectionTime(roundId: string) {
   try {
     const db = await createDrizzleSupabaseClient();
 
-    return await db.rls(async (tx) => {
-      // Verify user is host of the game room
-      const gameRoom = await tx
-        .select({ hostId: gameRooms.hostId })
-        .from(gameRooms)
-        .where(eq(gameRooms.id, gameRoomId))
-        .limit(1);
+    const updatedRound = await db.rls((tx) =>
+      tx
+        .update(rounds)
+        .set({
+          status: "selection_time",
+          selectionTimeStartedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(rounds.id, roundId))
+        .returning({
+          id: rounds.id,
+          status: rounds.status,
+          selectionTimeStartedAt: rounds.selectionTimeStartedAt,
+        })
+    );
 
-      if (!gameRoom.length) {
-        return { success: false, error: "Game room not found" };
-      }
+    if (updatedRound.length === 0) {
+      return {
+        success: false,
+        error: "Round not found or no permission to update",
+        data: null,
+      };
+    }
 
-      // Get all rounds for this game room
-      const gameRounds = await tx
-        .select({ id: rounds.id })
+    return {
+      success: true,
+      error: null,
+      data: updatedRound[0],
+    };
+  } catch (error) {
+    console.error("Error starting selection time:", error);
+    return {
+      success: false,
+      error: "Failed to start selection time",
+      data: null,
+    };
+  }
+}
+
+export async function endRound(roundId: string) {
+  try {
+    const db = await createDrizzleSupabaseClient();
+
+    const updatedRound = await db.rls((tx) =>
+      tx
+        .update(rounds)
+        .set({
+          status: "completed",
+          endedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(rounds.id, roundId))
+        .returning({
+          id: rounds.id,
+          status: rounds.status,
+          endedAt: rounds.endedAt,
+        })
+    );
+
+    if (updatedRound.length === 0) {
+      return {
+        success: false,
+        error: "Round not found or no permission to update",
+        data: null,
+      };
+    }
+
+    return {
+      success: true,
+      error: null,
+      data: updatedRound[0],
+    };
+  } catch (error) {
+    console.error("Error ending round:", error);
+    return {
+      success: false,
+      error: "Failed to end round",
+      data: null,
+    };
+  }
+}
+
+export async function getRoundTimer(roundId: string) {
+  try {
+    const db = await createDrizzleSupabaseClient();
+
+    const round = await db.rls((tx) =>
+      tx
+        .select({
+          id: rounds.id,
+          status: rounds.status,
+          startedAt: rounds.startedAt,
+          freeTimeStartedAt: rounds.freeTimeStartedAt,
+          selectionTimeStartedAt: rounds.selectionTimeStartedAt,
+          endedAt: rounds.endedAt,
+        })
         .from(rounds)
-        .where(eq(rounds.gameRoomId, gameRoomId));
+        .where(eq(rounds.id, roundId))
+    );
 
-      // Clear all timers for this game room
-      for (const round of gameRounds) {
-        const freeTimeKey = `${round.id}-free_time`;
-        const selectionKey = `${round.id}-selection`;
-        timerStates.delete(freeTimeKey);
-        timerStates.delete(selectionKey);
-      }
+    if (round.length === 0) {
+      return {
+        success: false,
+        error: "Round not found",
+        data: null,
+      };
+    }
 
-      return { success: true };
-    });
+    const roundData = round[0];
+    const now = new Date();
+
+    // Calculate remaining time based on current status
+    let remainingTime = 0;
+    let totalTime = 0;
+
+    if (roundData.status === "free_time" && roundData.freeTimeStartedAt) {
+      totalTime = 3 * 60 * 1000; // 3 minutes in milliseconds
+      const elapsed =
+        now.getTime() - new Date(roundData.freeTimeStartedAt).getTime();
+      remainingTime = Math.max(0, totalTime - elapsed);
+    } else if (
+      roundData.status === "selection_time" &&
+      roundData.selectionTimeStartedAt
+    ) {
+      totalTime = 1 * 60 * 1000; // 1 minute in milliseconds
+      const elapsed =
+        now.getTime() - new Date(roundData.selectionTimeStartedAt).getTime();
+      remainingTime = Math.max(0, totalTime - elapsed);
+    }
+
+    return {
+      success: true,
+      error: null,
+      data: {
+        ...roundData,
+        remainingTime,
+        totalTime,
+        currentTime: now.toISOString(),
+      },
+    };
   } catch (error) {
-    console.error("Error clearing all timers:", error);
+    console.error("Error fetching round timer:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to clear timers",
+      error: "Failed to fetch round timer",
+      data: null,
     };
   }
 }

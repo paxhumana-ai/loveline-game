@@ -28,6 +28,8 @@ export const participantStatusEnum = pgEnum("participant_status", [
   "joined",
   "ready",
   "playing",
+  "temporarily_away",
+  "left",
   "finished",
 ]);
 
@@ -62,8 +64,9 @@ export const questionCategoryEnum = pgEnum("question_category", [
 ]);
 
 export const roundStatusEnum = pgEnum("round_status", [
-  "pending",
-  "active",
+  "waiting",
+  "free_time",
+  "selection_time",
   "completed",
 ]);
 
@@ -121,6 +124,7 @@ export const gameRooms = pgTable(
     totalRounds: integer("total_rounds").notNull().default(3),
     hostId: uuid("host_id"), // nullable - 호스트가 나가도 게임은 계속
     status: gameRoomStatusEnum("status").notNull().default("waiting"),
+    lastActivityAt: timestamp("last_activity_at").defaultNow(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -165,6 +169,7 @@ export const participants = pgTable(
     character: text("character").notNull(), // 동물 캐릭터 이름
     status: participantStatusEnum("status").notNull().default("joined"),
     userId: uuid("user_id"), // nullable - 익명 참가 가능
+    lastSeenAt: timestamp("last_seen_at").defaultNow(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -221,9 +226,11 @@ export const rounds = pgTable(
     questionId: uuid("question_id")
       .references(() => questions.id)
       .notNull(),
-    status: roundStatusEnum("status").notNull().default("pending"),
+    status: roundStatusEnum("status").notNull().default("waiting"),
     startedAt: timestamp("started_at"),
     endedAt: timestamp("ended_at"),
+    freeTimeStartedAt: timestamp("free_time_started_at"),
+    selectionTimeStartedAt: timestamp("selection_time_started_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

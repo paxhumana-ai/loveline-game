@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getCurrentRound } from "@/domains/round/actions";
+import { getCurrentRound } from "@/domains/round/actions/fetch.action";
 // import { getParticipantsByRoom } from "@/domains/participant/actions"; // TODO: Implement participant actions
 
 export default async function SelectionPage({

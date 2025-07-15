@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getRoundHistory } from "@/domains/round/actions";
+import { getRoundHistory } from "@/domains/round/actions/fetch.action";
 
 export default async function ResultsPage({
   params,

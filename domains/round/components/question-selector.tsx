@@ -77,7 +77,7 @@ export function QuestionSelector({
     } finally {
       setIsLoading(false);
     }
-  }, [gameRoomId, currentCategories, currentPhase, onError]);
+  }, [gameRoomId, currentPhase, onError, roundNumber]);
 
   // Select a question for the current round
   const selectQuestion = useCallback(

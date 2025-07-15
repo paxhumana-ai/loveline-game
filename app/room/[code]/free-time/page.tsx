@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getCurrentRound } from "@/domains/round/actions";
+import { getCurrentRound } from "@/domains/round/actions/fetch.action";
 
 export default async function FreeTimePage({
   params,

@@ -119,22 +119,11 @@ export function RoundManager({
 
         setTimerState(newTimerState);
         onTimerStateChange?.(newTimerState);
-
-        // Auto-progress when time expires
-        if (autoProgressRounds && result.data.remainingTime <= 0) {
-          if (result.data.phase === "free_time") {
-            // Move to selection phase
-            await handleStartTimer("selection");
-          } else if (result.data.phase === "selection") {
-            // End current round and potentially start next
-            await handleEndCurrentRound();
-          }
-        }
       }
     } catch (error) {
       onError?.(`Failed to fetch timer status: ${error}`);
     }
-  }, [roundState.id, autoProgressRounds, onTimerStateChange, onError]);
+  }, [roundState.id, onTimerStateChange, onError]);
 
   // Start polling when round is active
   useEffect(() => {
@@ -151,36 +140,60 @@ export function RoundManager({
         setPollingInterval(null);
       }
     }
-  }, [roundState.status, fetchTimerStatus]);
+  }, [roundState.status, fetchTimerStatus, pollingInterval]);
 
-  // Initial load
-  useEffect(() => {
-    fetchRoundStatus();
-  }, [fetchRoundStatus]);
+  // Actions (wrapped in useCallback to prevent dependency changes)
+  const handleStartRound = useCallback(
+    async (roundNumber: number) => {
+      try {
+        const result = await startRound({
+          gameRoomId,
+          roundNumber,
+        });
 
-  // Actions
-  const handleStartRound = async (roundNumber: number) => {
-    try {
-      const result = await startRound({
-        gameRoomId,
-        roundNumber,
-      });
-
-      if (result.success) {
-        await fetchRoundStatus();
-        // Start free time automatically
-        if (result.data?.roundId) {
-          await handleStartTimer("free_time");
+        if (result.success) {
+          await fetchRoundStatus();
+          // Start free time automatically
+          if (result.data?.roundId) {
+            await handleStartTimer("free_time");
+          }
+        } else {
+          onError?.(result.error as string);
         }
-      } else {
-        onError?.(result.error as string);
+      } catch (error) {
+        onError?.(`Failed to start round: ${error}`);
       }
-    } catch (error) {
-      onError?.(`Failed to start round: ${error}`);
-    }
-  };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [gameRoomId, fetchRoundStatus, onError]
+  );
 
-  const handleEndCurrentRound = async () => {
+  const handleStartTimer = useCallback(
+    async (phase: "free_time" | "selection") => {
+      if (!roundState.id) return;
+
+      try {
+        const duration = phase === "free_time" ? 180 : 120; // 3min or 2min
+        const result = await startTimer({
+          roundId: roundState.id,
+          gameRoomId,
+          phase,
+          duration,
+        });
+
+        if (result.success) {
+          await fetchTimerStatus();
+        } else {
+          onError?.(result.error as string);
+        }
+      } catch (error) {
+        onError?.(`Failed to start timer: ${error}`);
+      }
+    },
+    [roundState.id, gameRoomId, fetchTimerStatus, onError]
+  );
+
+  const handleEndCurrentRound = useCallback(async () => {
     if (!roundState.id) return;
 
     try {
@@ -204,8 +217,45 @@ export function RoundManager({
     } catch (error) {
       onError?.(`Failed to end round: ${error}`);
     }
-  };
+  }, [
+    roundState.id,
+    roundState.roundNumber,
+    gameRoomId,
+    fetchRoundStatus,
+    autoProgressRounds,
+    totalRounds,
+    onError,
+    handleStartRound,
+  ]);
 
+  // Auto-progress when timer expires
+  useEffect(() => {
+    if (
+      autoProgressRounds &&
+      timerState.remainingTime <= 0 &&
+      roundState.status === "active"
+    ) {
+      if (timerState.phase === "free_time") {
+        handleStartTimer("selection");
+      } else if (timerState.phase === "selection") {
+        handleEndCurrentRound();
+      }
+    }
+  }, [
+    timerState.remainingTime,
+    timerState.phase,
+    roundState.status,
+    autoProgressRounds,
+    handleEndCurrentRound,
+    handleStartTimer,
+  ]);
+
+  // Initial load
+  useEffect(() => {
+    fetchRoundStatus();
+  }, [fetchRoundStatus]);
+
+  // Other action handlers
   const handlePauseCurrentRound = async () => {
     if (!roundState.id) return;
 
@@ -241,28 +291,6 @@ export function RoundManager({
       }
     } catch (error) {
       onError?.(`Failed to resume round: ${error}`);
-    }
-  };
-
-  const handleStartTimer = async (phase: "free_time" | "selection") => {
-    if (!roundState.id) return;
-
-    try {
-      const duration = phase === "free_time" ? 180 : 120; // 3min or 2min
-      const result = await startTimer({
-        roundId: roundState.id,
-        gameRoomId,
-        phase,
-        duration,
-      });
-
-      if (result.success) {
-        await fetchTimerStatus();
-      } else {
-        onError?.(result.error as string);
-      }
-    } catch (error) {
-      onError?.(`Failed to start timer: ${error}`);
     }
   };
 

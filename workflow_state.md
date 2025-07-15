@@ -4,199 +4,117 @@ _Last updated: 2025-01-21_
 
 ## Phase
 
-VALIDATE
+CONSTRUCT
 
 ## Status
 
-COMPLETED
+RUNNING
 
 ## Items
 
-- [x] **1. Backend Schema & Actions Implementation**
-  - [x] 1-1. Define round management schemas (round-control, question-selection, round-timer)
-  - [x] 1-2. Implement round control server actions (start, end, pause)
-  - [x] 1-3. Implement round fetch server actions (getCurrentRound, getRoundHistory, getRoundStatus)
-  - [x] 1-4. Implement question management server actions (selectQuestion, getQuestions, markUsed)
-  - [x] 1-5. Implement timer management server actions (startFreeTime, startSelection, getRemainingTime)
-- [x] **2. Frontend Route & Page Implementation**
-  - [x] 2-1. Create round progression page routes (/room/[code]/round/[roundNumber], /free-time, /selection)
-  - [x] 2-2. Implement round progression pages with proper state management
-- [x] **3. UI Components Implementation**
-  - [x] 3-1. Create round display components (header, question-display, timer)
-  - [x] 3-2. Create time-phase screens (free-time-screen, selection-screen)
-  - [x] 3-3. Create progress and navigation components (progress-bar, navigation, warning)
-  - [x] 3-4. Create business logic components (round-manager, question-selector, timer-controller)
-- [x] **4. Question Management System**
-  - [x] 4-1. Implement question categorization system (초반/중반/후반)
-  - [x] 4-2. Create question selection logic and duplication prevention
-- [x] **5. Time Management & Round State System**
-  - [x] 5-1. Implement timer system (3min free-time, 2min selection-time)
-  - [x] 5-2. Implement round state management (waiting/free_time/selection/processing/completed)
-  - [x] 5-3. Implement time warning and auto-progression system
+- [x] **1. Database Schema Extensions**
+  - [x] 1-1. Add time management fields to rounds table
+  - [x] 1-2. Add activity tracking fields to game_rooms table
+  - [x] 1-3. Add last_seen_at field to participants table
+  - [x] 1-4. Add round status enum and selection completion tracking
+- [x] **2. Server Actions Implementation**
+  - [x] 2-1. Implement game-room status server actions
+  - [x] 2-2. Implement participant management server actions
+  - [x] 2-3. Implement round management server actions
+- [ ] **3. Polling Hooks Implementation**
+  - [ ] 3-1. Create room polling hooks (useRoomPolling, useParticipantPolling)
+  - [ ] 3-2. Create round polling hooks (useRoundPolling)
+  - [ ] 3-3. Create timer hooks (useGameTimer, useRoundTimer, useServerTimeSync)
+- [ ] **4. State Management Components**
+  - [ ] 4-1. Create game status provider context
+  - [ ] 4-2. Create polling indicator and timer display components
+  - [ ] 4-3. Integrate polling system with existing game components
 
 ## Plan
 
-### Round & Question Domain Implementation Strategy
+### Database Schema Extensions Strategy
 
-**Database Schema Status**: ✅ All required tables exist (gameRooms, participants, questions, rounds, selections, matches)
+**1. Time Management Fields**
 
-**1. Backend Schema & Actions Implementation**
+- Add `freeTimeStartedAt`, `selectionTimeStartedAt` to rounds table
+- Add `lastActivityAt` to game_rooms table for tracking activity
+- Add `lastSeenAt` to participants table for online status
+- Update round status enum: `waiting`, `free_time`, `selection_time`, `completed`
 
-**Schema Files (`domains/round/schemas/`)**
+### Server Actions Implementation Strategy
 
-```
-domains/round/schemas/
-├── round-control.schema.ts - startRound, endRound, pauseRound validation
-├── question-selection.schema.ts - question category and selection logic validation
-├── round-timer.schema.ts - timer state and duration validation (180s free, 120s selection)
-└── index.ts - export all schemas
-```
+**1. Game Room Status Actions (`domains/game-room/actions/`)**
 
-**Server Actions (`domains/round/actions/`)**
+- `status.action.ts`: getRoomStatus, updateLastActivity
+- `polling.action.ts`: getRoomWithParticipants, checkRoomChanges
 
-```
-domains/round/actions/
-├── control.action.ts - startRound(), endRound(), pauseRound()
-├── fetch.action.ts - getCurrentRound(), getRoundHistory(), getRoundStatus()
-├── question.action.ts - selectQuestionForRound(), getQuestionsByCategory(), markQuestionAsUsed()
-├── timer.action.ts - startTimer(), getRemainingTime(), handleTimeOut()
-└── index.ts - export all actions
-```
+**2. Participant Management Actions (`domains/participant/actions/`)**
 
-**2. Frontend Route & Page Implementation**
+- `status.action.ts`: updateParticipantStatus, getParticipantStatuses
+- `polling.action.ts`: getActiveParticipants, updateLastSeen
 
-**Route Structure**
+**3. Round Management Actions (`domains/round/actions/`)**
 
-```
-app/room/[code]/
-├── round/[roundNumber]/page.tsx - Round progression page
-├── free-time/page.tsx - 3min free time phase
-├── selection/page.tsx - 2min selection phase
-└── results/page.tsx - Round results display
-```
+- `status.action.ts`: getRoundStatus, updateRoundStatus
+- `timer.action.ts`: startFreeTime, startSelectionTime, endRound
+- `polling.action.ts`: getRoundWithTimer, checkRoundProgress
 
-**3. UI Components Implementation**
+### Polling Hooks Implementation Strategy
 
-**Display Components (`domains/round/components/`)**
+**1. Room Polling (`domains/game-room/hooks/`)**
 
-```
-domains/round/components/
-├── round-header.tsx - Round info (number, total, status)
-├── question-display.tsx - Question with category styling
-├── round-timer.tsx - Countdown timer with progress
-├── round-progress-bar.tsx - Overall game progress
-├── time-warning.tsx - 30s/10s warnings
-└── round-navigation.tsx - Previous/next round navigation
-```
+- `useRoomPolling.ts`: 5초 간격 게임방 상태 폴링
+- `useParticipantPolling.ts`: 5초 간격 참가자 목록 폴링
 
-**Screen Components**
+**2. Round Polling (`domains/round/hooks/`)**
 
-```
-├── free-time-screen.tsx - 3min offline conversation phase
-├── selection-screen.tsx - 2min participant selection phase
-├── round-results-screen.tsx - Selection results display
-└── round-summary-screen.tsx - Game summary after all rounds
-```
+- `useRoundPolling.ts`: 1초 간격 라운드 상태 폴링
+- `useGameTimer.ts`: 클라이언트 타이머 관리
+- `useRoundTimer.ts`: 라운드별 타이머 (자유시간 3분, 선택시간 1분)
+- `useServerTimeSync.ts`: 서버 시간 동기화
 
-**Business Logic Components**
+**3. Optimization Hooks**
 
-```
-├── round-manager.tsx - Round state management container
-├── question-selector.tsx - Question selection and validation logic
-├── timer-controller.tsx - Timer control and auto-progression
-└── selection-handler.tsx - Participant selection management
-```
+- `usePollingOptimization.ts`: 백그라운드 시 폴링 중단, 에러 재시도
+- `useConnectionStatus.ts`: 네트워크 상태 감지
 
-**4. Question Management System**
+### State Management Components Strategy
 
-**Question Categorization Logic**
+**1. Context Providers (`domains/game-room/components/`)**
 
-- 초반 (rounds 1-3): Romance/friendship questions (lighter topics)
-- 중반 (rounds 4-7): Personality/lifestyle questions (deeper engagement)
-- 후반 (rounds 8-10): Preferences/hypothetical questions (serious selection)
+- `game-status-provider.tsx`: 게임 상태 Context Provider
+- `polling-provider.tsx`: 폴링 상태 관리 Provider
 
-**Question Selection Algorithm**
+**2. UI Components (`domains/round/components/`)**
 
-- Filter by round category (초반/중반/후반)
-- Exclude previously used questions in same game room
-- Random selection from available pool
-- Fallback to any category if pool exhausted
+- `polling-indicator.tsx`: 폴링 상태 표시
+- `timer-display.tsx`: 타이머 표시
+- `connection-status.tsx`: 연결 상태 표시
 
-**5. Time Management & Round State System**
+**3. Integration Components**
 
-**Timer System**
+- Update existing game components to use polling hooks
+- Add real-time state synchronization
 
-- Free time: 180 seconds (3 minutes) - offline conversation
-- Selection time: 120 seconds (2 minutes) - participant selection
-- Warning alerts: 30 seconds, 10 seconds remaining
-- Auto-progression when all participants complete selection
+### Security & Performance
 
-**Round State Flow**
-
-```
-pending → active (free_time) → active (selection) → completed
-```
-
-**State Transitions**
-
-- Host starts round: pending → active (free_time phase)
-- Free time ends: active (free_time) → active (selection)
-- All selections complete OR timeout: active (selection) → completed
-- Host can pause/resume at any point
+- Use existing RLS policies for all server actions
+- Implement polling optimization (interval adjustment, background suspension)
+- Add error handling and retry logic
+- Minimize database queries with optimized selects
 
 ## Log
 
-**Phase: ANALYZE**: Completed analysis of round and question domain requirements and relevant rules.
+**Phase: ANALYZE**:
 
-- **db-schema.rules.mdc**: Database schema rules with RLS policies, Drizzle ORM usage patterns, snake_case table naming, and auth.uid() usage in policies
-- **server-action.rules.mdc**: Server action patterns with domain-based structure, zod validation, and createDrizzleSupabaseClient usage for RLS
-- **ui.rules.mdc**: UI component structure with Next15 async server components, shadcn ui usage, client/server separation, and semantic styling
-- **form-ui.rules.mdc**: Form implementation with react-hook-form, zod validation, Controller pattern, and server action integration
-- **Database Schema Analysis**: All required tables already exist in db/schema.ts:
-  - gameRooms, participants, questions, rounds, selections, matches
-  - roundStatusEnum: "pending", "active", "completed"
-  - questionCategoryEnum: "romance", "friendship", "personality", "lifestyle", "preferences", "hypothetical"
-  - Proper RLS policies for game room participants and host authority
-
-**Phase: BLUEPRINT**: Completed task decomposition and implementation planning. Database schema already exists with all required tables.
-
-**Phase: CONSTRUCT**:
-
-- ✅ Item 1: Backend Schema & Actions Implementation COMPLETED
-
-  - ✅ Item 1-1: Created round management schemas with zod validation
-  - ✅ Item 1-2: Implemented round control server actions (startRound, endRound, pauseRound, resumeRound)
-  - ✅ Item 1-3: Implemented round fetch server actions (getCurrentRound, getRoundHistory, getRoundStatus, getRoundById)
-  - ✅ Item 1-4: Implemented question management server actions (selectQuestionForRound, getQuestionsByCategory, markQuestionAsUsed)
-  - ✅ Item 1-5: Implemented timer management server actions (startTimer, getRemainingTime, controlTimer, checkTimeWarning)
-  - All server actions follow RLS patterns and use createDrizzleSupabaseClient
-  - Question categorization system implemented (초반/중반/후반)
-  - Timer state management with in-memory storage
-
-- ✅ Item 2: Frontend Route & Page Implementation COMPLETED
-  - ✅ Item 2-1: Created round progression page routes with Next15 async server components
-  - ✅ Item 2-2: Implemented round, free-time, selection, and results pages with proper data fetching
-  - All pages follow ui.rules with semantic styling and server/client separation
-  - Placeholder participant data until participant domain is implemented
-
-Starting Item 3-1: Create round display components.
-
-- ✅ Item 3: UI Components Implementation COMPLETED
-  - ✅ Item 3-1: Created round display components (round-header, question-display, round-timer, round-progress-bar, time-warning, round-navigation)
-  - ✅ Item 3-2: Created time-phase screens (free-time-screen, selection-screen)
-  - ✅ Item 3-3: All progress and navigation components already completed from previous work
-  - ✅ Item 3-4: Created business logic components (round-manager, question-selector, timer-controller)
-- ✅ Item 4: Question Management System COMPLETED (Backend already implemented)
-
-  - ✅ Item 4-1: Question categorization system (초반/중반/후반) implemented in question-selection.schema.ts
-  - ✅ Item 4-2: Question selection logic and duplication prevention implemented in question.action.ts
-
-- ✅ Item 5: Time Management & Round State System COMPLETED (Backend already implemented)
-  - ✅ Item 5-1: Timer system (3min free-time, 2min selection-time) implemented in timer.action.ts and round-timer.schema.ts
-  - ✅ Item 5-2: Round state management implemented in control.action.ts and fetch.action.ts
-  - ✅ Item 5-3: Time warning and auto-progression system implemented in timer-controller.tsx and timer.action.ts
-
-Round and Question Domain Implementation COMPLETED. All backend schemas, server actions, frontend routes, UI components, question management, and timer systems are fully implemented and functional.
+- ✅ Read server-action.rules.mdc - Using createDrizzleSupabaseClient for RLS in server actions
+- ✅ Read db-schema.rules.mdc - Drizzle migration patterns and RLS policy considerations
+- ✅ Read ui.rules.mdc - Client/server component separation, React state management
+- ✅ Read 0006-realtime-communication-domain.md - Comprehensive polling system requirements
+- ✅ Analyzed current schema structure - Need time fields for rounds/rooms/participants
+- ✅ Designed server action structure - Game room, participant, round management actions
+- ✅ Designed polling strategy - Different intervals for different data types with hooks
+- ✅ Outlined component architecture - Context providers and UI components
 
 ## ArchiveLog
 

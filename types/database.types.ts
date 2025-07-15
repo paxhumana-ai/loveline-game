@@ -38,6 +38,7 @@ export type Database = {
           created_at: string
           host_id: string | null
           id: string
+          last_activity_at: string | null
           max_participants: number
           status: Database["public"]["Enums"]["game_room_status"]
           total_rounds: number
@@ -48,6 +49,7 @@ export type Database = {
           created_at?: string
           host_id?: string | null
           id?: string
+          last_activity_at?: string | null
           max_participants?: number
           status?: Database["public"]["Enums"]["game_room_status"]
           total_rounds?: number
@@ -58,6 +60,7 @@ export type Database = {
           created_at?: string
           host_id?: string | null
           id?: string
+          last_activity_at?: string | null
           max_participants?: number
           status?: Database["public"]["Enums"]["game_room_status"]
           total_rounds?: number
@@ -118,6 +121,7 @@ export type Database = {
           game_room_id: string
           gender: Database["public"]["Enums"]["gender"]
           id: string
+          last_seen_at: string | null
           mbti: Database["public"]["Enums"]["mbti"]
           nickname: string
           status: Database["public"]["Enums"]["participant_status"]
@@ -130,6 +134,7 @@ export type Database = {
           game_room_id: string
           gender: Database["public"]["Enums"]["gender"]
           id?: string
+          last_seen_at?: string | null
           mbti: Database["public"]["Enums"]["mbti"]
           nickname: string
           status?: Database["public"]["Enums"]["participant_status"]
@@ -142,6 +147,7 @@ export type Database = {
           game_room_id?: string
           gender?: Database["public"]["Enums"]["gender"]
           id?: string
+          last_seen_at?: string | null
           mbti?: Database["public"]["Enums"]["mbti"]
           nickname?: string
           status?: Database["public"]["Enums"]["participant_status"]
@@ -228,10 +234,12 @@ export type Database = {
         Row: {
           created_at: string
           ended_at: string | null
+          free_time_started_at: string | null
           game_room_id: string
           id: string
           question_id: string
           round_number: number
+          selection_time_started_at: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["round_status"]
           updated_at: string
@@ -239,10 +247,12 @@ export type Database = {
         Insert: {
           created_at?: string
           ended_at?: string | null
+          free_time_started_at?: string | null
           game_room_id: string
           id?: string
           question_id: string
           round_number: number
+          selection_time_started_at?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["round_status"]
           updated_at?: string
@@ -250,10 +260,12 @@ export type Database = {
         Update: {
           created_at?: string
           ended_at?: string | null
+          free_time_started_at?: string | null
           game_room_id?: string
           id?: string
           question_id?: string
           round_number?: number
+          selection_time_started_at?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["round_status"]
           updated_at?: string
@@ -348,7 +360,13 @@ export type Database = {
         | "ISFP"
         | "ESTP"
         | "ESFP"
-      participant_status: "joined" | "ready" | "playing" | "finished"
+      participant_status:
+        | "joined"
+        | "ready"
+        | "playing"
+        | "temporarily_away"
+        | "left"
+        | "finished"
       question_category:
         | "romance"
         | "friendship"
@@ -356,7 +374,7 @@ export type Database = {
         | "lifestyle"
         | "preferences"
         | "hypothetical"
-      round_status: "pending" | "active" | "completed"
+      round_status: "waiting" | "free_time" | "selection_time" | "completed"
       user_type: "ADMIN" | "GENERAL"
     }
     CompositeTypes: {
@@ -505,7 +523,14 @@ export const Constants = {
         "ESTP",
         "ESFP",
       ],
-      participant_status: ["joined", "ready", "playing", "finished"],
+      participant_status: [
+        "joined",
+        "ready",
+        "playing",
+        "temporarily_away",
+        "left",
+        "finished",
+      ],
       question_category: [
         "romance",
         "friendship",
@@ -514,7 +539,7 @@ export const Constants = {
         "preferences",
         "hypothetical",
       ],
-      round_status: ["pending", "active", "completed"],
+      round_status: ["waiting", "free_time", "selection_time", "completed"],
       user_type: ["ADMIN", "GENERAL"],
     },
   },

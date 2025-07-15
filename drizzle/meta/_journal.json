@@ -15,6 +15,20 @@
       "when": 1752553320369,
       "tag": "0001_nifty_clint_barton",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752561155837,
+      "tag": "0002_colossal_callisto",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1752561501628,
+      "tag": "0003_jittery_romulus",
+      "breakpoints": true
     }
   ]
 }
