@@ -78,9 +78,7 @@
         "game_rooms_code_unique": {
           "name": "game_rooms_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "code"
-          ]
+          "columns": ["code"]
         }
       },
       "policies": {
@@ -88,28 +86,21 @@
           "name": "Enable read access for participants",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "using": "id in (\n        select game_room_id from participants \n        where user_id = (select auth.uid()) OR user_id IS NULL\n      )"
         },
         "Enable insert for authenticated users": {
           "name": "Enable insert for authenticated users",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "(select auth.uid()) = host_id"
         },
         "Enable update for host only": {
           "name": "Enable update for host only",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "using": "(select auth.uid()) = host_id",
           "withCheck": "(select auth.uid()) = host_id"
         },
@@ -117,9 +108,7 @@
           "name": "Enable delete for host only",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "using": "(select auth.uid()) = host_id"
         }
       },
@@ -169,12 +158,8 @@
           "name": "matches_game_room_id_game_rooms_id_fk",
           "tableFrom": "matches",
           "tableTo": "game_rooms",
-          "columnsFrom": [
-            "game_room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["game_room_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -182,12 +167,8 @@
           "name": "matches_participant1_id_participants_id_fk",
           "tableFrom": "matches",
           "tableTo": "participants",
-          "columnsFrom": [
-            "participant1_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["participant1_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -195,12 +176,8 @@
           "name": "matches_participant2_id_participants_id_fk",
           "tableFrom": "matches",
           "tableTo": "participants",
-          "columnsFrom": [
-            "participant2_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["participant2_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -212,19 +189,14 @@
           "name": "Enable read access for matched participants",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "using": "participant1_id in (\n        select id from participants \n        where user_id = (select auth.uid()) OR user_id IS NULL\n      ) OR participant2_id in (\n        select id from participants \n        where user_id = (select auth.uid()) OR user_id IS NULL\n      )"
         },
         "Enable insert for game room host": {
           "name": "Enable insert for game room host",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "game_room_id in (\n        select id from game_rooms where host_id = (select auth.uid())\n      )"
         }
       },
@@ -316,12 +288,8 @@
           "name": "participants_game_room_id_game_rooms_id_fk",
           "tableFrom": "participants",
           "tableTo": "game_rooms",
-          "columnsFrom": [
-            "game_room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["game_room_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -333,30 +301,21 @@
           "name": "Enable read access for same room participants",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "using": "game_room_id in (\n        select game_room_id from participants \n        where user_id = (select auth.uid()) OR user_id IS NULL\n      )"
         },
         "Enable insert for authenticated and anonymous users": {
           "name": "Enable insert for authenticated and anonymous users",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "withCheck": "(user_id IS NULL AND (select auth.uid()) IS NULL) OR (user_id IS NOT NULL AND user_id = (select auth.uid()))"
         },
         "Enable update for own record": {
           "name": "Enable update for own record",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "using": "(user_id IS NULL AND (select auth.uid()) IS NULL) OR (user_id IS NOT NULL AND user_id = (select auth.uid()))",
           "withCheck": "(user_id IS NULL AND (select auth.uid()) IS NULL) OR (user_id IS NOT NULL AND user_id = (select auth.uid()))"
         }
@@ -441,12 +400,8 @@
           "tableFrom": "profiles",
           "tableTo": "users",
           "schemaTo": "auth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -456,9 +411,7 @@
         "profiles_email_unique": {
           "name": "profiles_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {
@@ -466,28 +419,21 @@
           "name": "Enable read access for all users",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "using": "true"
         },
         "Enable insert for authenticated users only": {
           "name": "Enable insert for authenticated users only",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "(select auth.uid()) = user_id"
         },
         "Enable update for users based on user_id": {
           "name": "Enable update for users based on user_id",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "using": "(select auth.uid()) = user_id",
           "withCheck": "(select auth.uid()) = user_id"
         },
@@ -495,9 +441,7 @@
           "name": "Enable delete for users based on user_id",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "using": "(select auth.uid()) = user_id"
         }
       },
@@ -559,10 +503,7 @@
           "name": "Enable read access for all users",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "using": "true"
         }
       },
@@ -651,12 +592,8 @@
           "name": "rounds_game_room_id_game_rooms_id_fk",
           "tableFrom": "rounds",
           "tableTo": "game_rooms",
-          "columnsFrom": [
-            "game_room_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["game_room_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -664,12 +601,8 @@
           "name": "rounds_question_id_questions_id_fk",
           "tableFrom": "rounds",
           "tableTo": "questions",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["question_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -681,28 +614,21 @@
           "name": "Enable read access for same room participants",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "using": "game_room_id in (\n        select game_room_id from participants \n        where user_id = (select auth.uid()) OR user_id IS NULL\n      )"
         },
         "Enable insert for game room host": {
           "name": "Enable insert for game room host",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "withCheck": "game_room_id in (\n        select id from game_rooms where host_id = (select auth.uid())\n      )"
         },
         "Enable update for game room host": {
           "name": "Enable update for game room host",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": [
-            "authenticated"
-          ],
+          "to": ["authenticated"],
           "using": "game_room_id in (\n        select id from game_rooms where host_id = (select auth.uid())\n      )",
           "withCheck": "game_room_id in (\n        select id from game_rooms where host_id = (select auth.uid())\n      )"
         }
@@ -753,12 +679,8 @@
           "name": "selections_round_id_rounds_id_fk",
           "tableFrom": "selections",
           "tableTo": "rounds",
-          "columnsFrom": [
-            "round_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["round_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -766,12 +688,8 @@
           "name": "selections_selector_participant_id_participants_id_fk",
           "tableFrom": "selections",
           "tableTo": "participants",
-          "columnsFrom": [
-            "selector_participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["selector_participant_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -779,12 +697,8 @@
           "name": "selections_selected_participant_id_participants_id_fk",
           "tableFrom": "selections",
           "tableTo": "participants",
-          "columnsFrom": [
-            "selected_participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["selected_participant_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -796,20 +710,14 @@
           "name": "Enable read access for same round participants",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "using": "round_id in (\n        select r.id from rounds r\n        join participants p on r.game_room_id = p.game_room_id\n        where p.user_id = (select auth.uid()) OR p.user_id IS NULL\n      )"
         },
         "Enable insert for own selections": {
           "name": "Enable insert for own selections",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": [
-            "anon",
-            "authenticated"
-          ],
+          "to": ["anon", "authenticated"],
           "withCheck": "selector_participant_id in (\n        select id from participants \n        where user_id = (select auth.uid()) OR user_id IS NULL\n      )"
         }
       },
@@ -821,21 +729,12 @@
     "public.game_room_status": {
       "name": "game_room_status",
       "schema": "public",
-      "values": [
-        "waiting",
-        "in_progress",
-        "completed",
-        "cancelled"
-      ]
+      "values": ["waiting", "in_progress", "completed", "cancelled"]
     },
     "public.gender": {
       "name": "gender",
       "schema": "public",
-      "values": [
-        "male",
-        "female",
-        "other"
-      ]
+      "values": ["male", "female", "other"]
     },
     "public.mbti": {
       "name": "mbti",
@@ -862,12 +761,7 @@
     "public.participant_status": {
       "name": "participant_status",
       "schema": "public",
-      "values": [
-        "joined",
-        "ready",
-        "playing",
-        "finished"
-      ]
+      "values": ["joined", "ready", "playing", "finished"]
     },
     "public.question_category": {
       "name": "question_category",
@@ -884,20 +778,12 @@
     "public.round_status": {
       "name": "round_status",
       "schema": "public",
-      "values": [
-        "waiting",
-        "free_time",
-        "selection_time",
-        "completed"
-      ]
+      "values": ["waiting", "free_time", "selection_time", "completed"]
     },
     "public.user_type": {
       "name": "user_type",
       "schema": "public",
-      "values": [
-        "ADMIN",
-        "GENERAL"
-      ]
+      "values": ["ADMIN", "GENERAL"]
     }
   },
   "schemas": {},
